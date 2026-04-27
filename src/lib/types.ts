@@ -42,3 +42,17 @@ export interface Testimonial {
   is_published: boolean;
   created_at: string;
 }
+
+export interface BlogPost {
+  id: string;
+  title: string;
+  slug: string;
+  content: string;
+  meta_title: string;
+  meta_description: string;
+  featured_image: string | null;
+  is_published: boolean;
+  author_id: string | null;
+  created_at: string;
+  updated_at: string;
+}
