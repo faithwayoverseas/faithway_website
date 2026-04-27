@@ -1,11 +1,9 @@
 import type { Metadata } from "next";
 import { Outfit, Inter } from "next/font/google";
 import "./globals.css";
-import { Navbar } from "@/components/layout/Navbar";
-import { Footer } from "@/components/layout/Footer";
 import SmoothScroll from "@/components/layout/SmoothScroll";
-import { WhatsAppButton } from "@/components/ui/WhatsAppButton";
 import CustomCursor from "@/components/ui/CustomCursor";
+import PublicLayoutWrapper from "@/components/layout/PublicLayoutWrapper";
 
 const outfit = Outfit({
   variable: "--font-outfit",
@@ -52,10 +50,9 @@ export default function RootLayout({
       <body className="min-h-full flex flex-col bg-midnight text-white selection:bg-gold/30">
         <SmoothScroll>
           <CustomCursor />
-          <Navbar />
-          <main className="flex-grow">{children}</main>
-          <Footer />
-          <WhatsAppButton />
+          <PublicLayoutWrapper>
+            {children}
+          </PublicLayoutWrapper>
         </SmoothScroll>
       </body>
     </html>
