@@ -36,19 +36,20 @@ export const ContactSection = () => {
 
             <div className="space-y-8 md:space-y-12">
               {[
-                { icon: "📍", label: "Regional Hub", value: "Level 41, Emirates Towers, Dubai, UAE" },
-                { icon: "✉️", label: "Email Office", value: "faithwayoverseas@gmail.com" },
-                { icon: "📞", label: "Priority Line", value: "+971 50 888 1754" },
+                { icon: "📍", label: "India Support Desk", value: "Bairamalguda Rd, Sri Venkateshwara Colony, Hyderabad - 500079", href: "https://maps.google.com/?q=Bairamalguda+Rd+Sri+Venkateshwara+Colony+Hyderabad+500079" },
+                { icon: "✉️", label: "Official Email", value: "faithwayoverseas@gmail.com", href: "mailto:faithwayoverseas@gmail.com" },
+                { icon: "📞", label: "UAE Regional Office", value: "+971 50 888 1754", href: "tel:+971508881754" },
+                { icon: "📞", label: "India Support Desk", value: "+91 72075 89444", href: "tel:+917207589444" },
               ].map((item) => (
-                <div key={item.label} className="flex gap-6 md:gap-8 group">
+                <a key={item.label} href={item.href} target={item.href.startsWith("http") ? "_blank" : undefined} rel="noopener noreferrer" className="flex gap-6 md:gap-8 group">
                   <div className="w-12 h-12 md:w-16 md:h-16 rounded-2xl md:rounded-[1.5rem] glass flex items-center justify-center text-xl md:text-2xl group-hover:bg-royal transition-all duration-500">
                     {item.icon}
                   </div>
                   <div>
                     <h4 className="text-white/40 uppercase tracking-[0.2em] text-[10px] md:text-xs font-bold mb-2">{item.label}</h4>
-                    <p className="text-base md:text-xl text-white font-outfit">{item.value}</p>
+                    <p className="text-base md:text-xl text-white font-outfit group-hover:text-gold transition-colors">{item.value}</p>
                   </div>
-                </div>
+                </a>
               ))}
             </div>
           </div>

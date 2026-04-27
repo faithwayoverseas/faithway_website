@@ -121,7 +121,7 @@ export const Navbar = () => {
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.5 }}
-              className="mt-8 w-full px-12"
+              className="mt-8 w-full px-12 flex flex-col gap-6"
             >
               <PremiumButton 
                 variant="gold" 
@@ -130,6 +130,12 @@ export const Navbar = () => {
               >
                 Consult Now
               </PremiumButton>
+              
+              <div className="flex justify-center gap-10">
+                <a href="tel:+971508881754" className="text-white/40 hover:text-gold transition-colors text-sm uppercase tracking-widest font-bold">UAE</a>
+                <a href="tel:+917207589444" className="text-white/40 hover:text-gold transition-colors text-sm uppercase tracking-widest font-bold">India</a>
+                <a href="https://wa.me/971508881754" className="text-gold transition-colors text-sm uppercase tracking-widest font-bold">WhatsApp</a>
+              </div>
             </motion.div>
           </motion.div>
         )}

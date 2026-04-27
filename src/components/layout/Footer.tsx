@@ -9,7 +9,7 @@ export const Footer = () => {
       
       <div className="container-custom">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-16 mb-24">
-          <div className="lg:col-span-4">
+          <div className="lg:col-span-3">
             <Link href="/" className="flex items-center gap-4 group mb-8">
               <div className="relative w-14 h-14 overflow-hidden rounded-xl">
                 <Image 
@@ -66,7 +66,28 @@ export const Footer = () => {
             </ul>
           </div>
 
-          <div className="lg:col-span-4">
+          <div className="lg:col-span-2">
+            <h4 className="text-white font-bold mb-8 uppercase tracking-[0.2em] text-xs">Contact</h4>
+            <ul className="space-y-4">
+              <li>
+                <a href="mailto:faithwayoverseas@gmail.com" className="text-white/40 hover:text-gold transition-colors font-light text-sm block">
+                  Email Us
+                </a>
+              </li>
+              <li>
+                <a href="tel:+971508881754" className="text-white/40 hover:text-gold transition-colors font-light text-sm block">
+                  UAE Support
+                </a>
+              </li>
+              <li>
+                <a href="tel:+917207589444" className="text-white/40 hover:text-gold transition-colors font-light text-sm block">
+                  India Support
+                </a>
+              </li>
+            </ul>
+          </div>
+
+          <div className="lg:col-span-3">
             <h4 className="text-white font-bold mb-8 uppercase tracking-[0.2em] text-xs">Stay Elite</h4>
             <p className="text-white/40 mb-8 font-light">Subscribe to receive exclusive insights on global immigration trends.</p>
             <form className="flex gap-2">
