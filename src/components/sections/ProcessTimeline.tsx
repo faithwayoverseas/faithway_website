@@ -62,16 +62,16 @@ export const ProcessTimeline = () => {
               >
                 <div className="flex-1 w-full lg:w-auto">
                   <div className={cn(
-                    "p-12 rounded-[3rem] glass-card relative group hover:bg-white/[0.05]",
+                    "p-6 md:p-12 rounded-[2rem] md:rounded-[3rem] glass-card relative group hover:bg-white/[0.05]",
                     i % 2 === 0 ? "lg:text-left" : "lg:text-right"
                   )}>
                     <span className="text-gold font-bold mb-4 block uppercase tracking-[0.4em] text-[10px] md:text-xs">
                       Phase 0{i + 1}
                     </span>
-                    <h3 className="text-3xl md:text-4xl font-bold text-white mb-6 font-outfit tracking-tight">
+                    <h3 className="text-2xl md:text-4xl font-bold text-white mb-4 md:mb-6 font-outfit tracking-tight">
                       {step.title}
                     </h3>
-                    <p className="text-white/40 leading-relaxed text-lg font-light group-hover:text-white/70 transition-colors">
+                    <p className="text-white/40 leading-relaxed text-base md:text-lg font-light group-hover:text-white/70 transition-colors">
                       {step.desc}
                     </p>
                     
@@ -85,7 +85,7 @@ export const ProcessTimeline = () => {
                 
                 {/* Visual anchor in center */}
                 <div className="relative z-10 shrink-0">
-                  <div className="w-20 h-20 rounded-full bg-midnight border border-white/10 flex items-center justify-center text-3xl shadow-[0_0_50px_rgba(0,0,0,0.5)] group-hover:border-gold transition-colors duration-500">
+                  <div className="w-14 h-14 md:w-20 md:h-20 rounded-full bg-midnight border border-white/10 flex items-center justify-center text-xl md:text-3xl shadow-[0_0_50px_rgba(0,0,0,0.5)] group-hover:border-gold transition-colors duration-500">
                     {step.icon}
                   </div>
                   {/* Outer ring */}

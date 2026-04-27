@@ -54,12 +54,12 @@ export const ServicesShowcase = () => {
                 i === 0 ? "lg:col-span-7" : i === 1 ? "lg:col-span-5" : i === 2 ? "lg:col-span-5" : "lg:col-span-7"
               )}
             >
-              <div className="glass-card h-full flex flex-col p-12 group hover:bg-white/[0.05] relative overflow-hidden rounded-[3rem]">
-                <div className="text-6xl mb-12 transform group-hover:scale-110 group-hover:-rotate-12 transition-transform duration-700 w-fit">{service.icon}</div>
-                <h3 className="text-4xl font-bold text-white mb-6 font-outfit tracking-tighter">{service.title}</h3>
-                <p className="text-white/40 text-xl mb-12 leading-relaxed font-light group-hover:text-white/70 transition-colors">{service.desc}</p>
+              <div className="glass-card h-full flex flex-col p-6 md:p-12 group hover:bg-white/[0.05] relative overflow-hidden rounded-[2rem] md:rounded-[3rem]">
+                <div className="text-4xl md:text-6xl mb-6 md:mb-12 transform group-hover:scale-110 group-hover:-rotate-12 transition-transform duration-700 w-fit">{service.icon}</div>
+                <h3 className="text-2xl md:text-4xl font-bold text-white mb-3 md:mb-6 font-outfit tracking-tighter">{service.title}</h3>
+                <p className="text-base md:text-xl mb-6 md:mb-12 leading-relaxed font-light group-hover:text-white/70 transition-colors">{service.desc}</p>
                 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-12 flex-grow">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4 mb-6 md:mb-12 flex-grow">
                   {service.benefits.map((benefit) => (
                     <div key={benefit} className="flex items-center gap-3 text-white/60 text-sm">
                       <div className="w-1 h-1 rounded-full bg-gold" />

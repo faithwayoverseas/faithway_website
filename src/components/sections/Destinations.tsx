@@ -31,7 +31,7 @@ export const Destinations = () => {
               transition={{ delay: i * 0.1, duration: 1, ease: [0.23, 1, 0.32, 1] }}
               className="group cursor-pointer"
             >
-              <div className="relative h-[500px] rounded-[2rem] overflow-hidden">
+              <div className="relative h-[350px] md:h-[500px] rounded-[1.5rem] md:rounded-[2rem] overflow-hidden">
                 {/* Background Image */}
                 <div 
                   className="absolute inset-0 bg-cover bg-center transition-transform duration-1000 group-hover:scale-110"
@@ -40,13 +40,13 @@ export const Destinations = () => {
                 <div className="absolute inset-0 bg-gradient-to-t from-midnight via-midnight/20 to-transparent opacity-80" />
                 
                 {/* Content Overlay */}
-                <div className="absolute inset-0 p-10 flex flex-col justify-end">
+                <div className="absolute inset-0 p-6 md:p-10 flex flex-col justify-end">
                   <div className="mb-4">
                     <span className="text-gold font-bold tracking-widest text-xs uppercase mb-2 block">Pathways to {dest.name}</span>
-                    <h3 className="text-4xl font-bold text-white font-outfit">{dest.name}</h3>
+                    <h3 className="text-2xl md:text-4xl font-bold text-white font-outfit">{dest.name}</h3>
                   </div>
                   
-                  <p className="text-white/70 mb-8 line-clamp-2 transform translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500">
+                  <p className="text-white/70 text-sm md:text-base mb-6 md:mb-8 line-clamp-2 transform translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500">
                     {dest.desc}
                   </p>
                   

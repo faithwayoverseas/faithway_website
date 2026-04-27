@@ -39,7 +39,7 @@ export const Navbar = () => {
     <nav
       className={cn(
         "fixed top-0 left-0 w-full z-[100] transition-all duration-500",
-        scrolled ? "py-4 bg-midnight/40 backdrop-blur-2xl border-b border-white/5" : "py-8 bg-transparent"
+        scrolled ? "py-2 md:py-4 bg-midnight/40 backdrop-blur-2xl border-b border-white/5" : "py-4 md:py-8 bg-transparent"
       )}
     >
       <div className="container mx-auto px-6 flex items-center justify-between">
@@ -48,7 +48,7 @@ export const Navbar = () => {
           onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: "smooth" }); }}
           className="flex items-center gap-3 group"
         >
-          <div className="relative w-12 h-12 overflow-hidden rounded-lg">
+          <div className="relative w-8 h-8 md:w-12 md:h-12 overflow-hidden rounded-lg">
             <Image 
               src="/logo.png" 
               alt="Faithway Overseas Logo" 
@@ -56,7 +56,7 @@ export const Navbar = () => {
               className="object-cover group-hover:scale-110 transition-transform duration-300"
             />
           </div>
-          <span className="text-2xl font-outfit font-bold tracking-tight text-white">
+          <span className="text-lg md:text-2xl font-outfit font-bold tracking-tight text-white">
             FAITHWAY<span className="text-gold">OVERSEAS</span>
           </span>
         </Link>
@@ -84,10 +84,10 @@ export const Navbar = () => {
 
         {/* Mobile Toggle */}
         <button
-          className="lg:hidden text-white w-10 h-10 flex items-center justify-center bg-white/5 rounded-full border border-white/10"
+          className="lg:hidden text-white w-8 h-8 flex items-center justify-center bg-white/5 rounded-full border border-white/10"
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
         >
-          <div className="w-5 flex flex-col gap-1.5">
+          <div className="w-4 flex flex-col gap-1">
             <motion.div animate={{ rotate: mobileMenuOpen ? 45 : 0, y: mobileMenuOpen ? 6 : 0 }} className="h-0.5 w-full bg-white rounded-full" />
             <motion.div animate={{ opacity: mobileMenuOpen ? 0 : 1 }} className="h-0.5 w-full bg-white rounded-full" />
             <motion.div animate={{ rotate: mobileMenuOpen ? -45 : 0, y: mobileMenuOpen ? -6 : 0 }} className="h-0.5 w-full bg-white rounded-full" />

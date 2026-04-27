@@ -13,9 +13,10 @@ export const Hero = () => {
   };
 
   return (
-    <section className="relative min-h-[110vh] flex items-center pt-32 pb-24 overflow-hidden">
+    <section className="relative min-h-screen lg:min-h-[110vh] flex items-center pt-24 md:pt-32 pb-16 md:pb-24 overflow-hidden">
       {/* Background elements */}
-      <div className="absolute top-0 right-0 w-full lg:w-3/5 h-full -z-10 opacity-70 lg:opacity-100">
+      <div className="absolute top-0 right-0 w-full lg:w-3/5 h-[40vh] lg:h-full -z-10 opacity-50 lg:opacity-100">
+        <div className="absolute inset-0 bg-gradient-to-t from-midnight via-transparent to-transparent lg:hidden z-10" />
         <div className="absolute inset-0 bg-gradient-to-l from-transparent via-midnight to-midnight z-10 hidden lg:block" />
         <Globe />
       </div>
@@ -28,13 +29,13 @@ export const Hero = () => {
             transition={{ duration: 1, ease: [0.23, 1, 0.32, 1] }}
             className="flex items-center gap-4 mb-8 justify-center lg:justify-start"
           >
-            <div className="w-12 h-px bg-gold" />
-            <span className="text-gold font-bold tracking-[0.4em] uppercase text-[10px] md:text-xs">
+              <div className="w-8 md:w-12 h-px bg-gold" />
+            <span className="text-gold font-bold tracking-[0.3em] md:tracking-[0.4em] uppercase text-[9px] md:text-xs">
               Elite Immigration Partners
             </span>
           </motion.div>
 
-          <h1 className="text-6xl md:text-8xl lg:text-[10rem] font-bold font-outfit text-white mb-12 leading-[0.9] tracking-tighter text-center lg:text-left">
+          <h1 className="text-4xl md:text-8xl lg:text-[10rem] font-bold font-outfit text-white mb-8 md:mb-12 leading-[1.1] md:leading-[0.9] tracking-tighter text-center lg:text-left">
             <motion.span
               initial={{ opacity: 0, x: -50 }}
               animate={{ opacity: 1, x: 0 }}
@@ -57,7 +58,7 @@ export const Hero = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 1, delay: 0.8 }}
-            className="text-xl md:text-2xl text-white/50 mb-12 max-w-2xl mx-auto lg:mx-0 leading-relaxed font-light text-center lg:text-left"
+            className="text-lg md:text-2xl text-white/50 mb-8 md:mb-12 max-w-2xl mx-auto lg:mx-0 leading-relaxed font-light text-center lg:text-left"
           >
             Experience the pinnacle of immigration consultancy. We turn global aspirations into reality with precision, integrity, and elite service.
           </motion.p>
@@ -66,21 +67,21 @@ export const Hero = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, delay: 1 }}
-            className="flex flex-col sm:flex-row gap-8 justify-center lg:justify-start items-center"
+            className="flex flex-col sm:flex-row gap-6 md:gap-8 justify-center lg:justify-start items-center"
           >
             <PremiumButton 
               variant="gold" 
-              className="text-xl px-12 py-6 min-w-[240px]"
+              className="text-lg md:text-xl px-10 md:px-12 py-4 md:py-6 min-w-[220px] md:min-w-[240px]"
               onClick={scrollToContact}
             >
               Start Your Journey
             </PremiumButton>
             <button 
               onClick={() => document.getElementById("destinations")?.scrollIntoView({ behavior: "smooth" })}
-              className="text-white/60 hover:text-white transition-colors flex items-center gap-4 group text-lg tracking-widest uppercase font-bold"
+              className="text-white/60 hover:text-white transition-colors flex items-center gap-3 md:gap-4 group text-base md:text-lg tracking-widest uppercase font-bold"
             >
               View Destinations
-              <span className="w-12 h-12 rounded-full border border-white/20 flex items-center justify-center group-hover:bg-white group-hover:text-midnight transition-all duration-500">
+              <span className="w-10 h-10 md:w-12 md:h-12 rounded-full border border-white/20 flex items-center justify-center group-hover:bg-white group-hover:text-midnight transition-all duration-500">
                 ↓
               </span>
             </button>
@@ -90,7 +91,7 @@ export const Hero = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 1.5, duration: 1 }}
-            className="mt-24 flex items-center gap-12 justify-center lg:justify-start"
+            className="mt-16 md:mt-24 flex items-center gap-8 md:gap-12 justify-center lg:justify-start"
           >
             {[
               { label: "Experience", value: "15+" },
@@ -98,7 +99,7 @@ export const Hero = () => {
               { label: "Destinations", value: "50+" },
             ].map((stat) => (
               <div key={stat.label}>
-                <div className="text-3xl font-bold text-white mb-1 font-outfit">{stat.value}</div>
+                <div className="text-2xl md:text-3xl font-bold text-white mb-1 font-outfit">{stat.value}</div>
                 <div className="text-white/30 text-[10px] uppercase tracking-widest font-bold">{stat.label}</div>
               </div>
             ))}

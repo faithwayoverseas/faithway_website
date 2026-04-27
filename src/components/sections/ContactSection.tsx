@@ -22,31 +22,31 @@ export const ContactSection = () => {
   return (
     <section id="contact" className="section-padding relative overflow-hidden">
       <div className="container-custom">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 lg:gap-24 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-24 items-start">
           <div className="lg:col-span-5">
             <SectionTitle
               title="Begin Your Global Legacy"
               subtitle="Secure Consultation"
               align="left"
-              className="mb-12"
+              className="mb-8 md:mb-12"
             />
-            <p className="text-xl text-white/50 mb-16 font-light leading-relaxed">
+            <p className="text-lg md:text-xl text-white/50 mb-10 md:mb-16 font-light leading-relaxed">
               Your journey to international success deserves absolute precision. Connect with our elite consultants today.
             </p>
-            
-            <div className="space-y-12">
+
+            <div className="space-y-8 md:space-y-12">
               {[
                 { icon: "📍", label: "Regional Hub", value: "Level 41, Emirates Towers, Dubai, UAE" },
-                { icon: "✉️", label: "Email Office", value: "uae@faithwayoverseas.com" },
-                { icon: "📞", label: "Priority Line", value: "+971 50 123 4567" },
+                { icon: "✉️", label: "Email Office", value: "faithwayoverseas@gmail.com" },
+                { icon: "📞", label: "Priority Line", value: "+971 50 888 1754" },
               ].map((item) => (
-                <div key={item.label} className="flex gap-8 group">
-                  <div className="w-16 h-16 rounded-[1.5rem] glass flex items-center justify-center text-2xl group-hover:bg-royal transition-all duration-500">
+                <div key={item.label} className="flex gap-6 md:gap-8 group">
+                  <div className="w-12 h-12 md:w-16 md:h-16 rounded-2xl md:rounded-[1.5rem] glass flex items-center justify-center text-xl md:text-2xl group-hover:bg-royal transition-all duration-500">
                     {item.icon}
                   </div>
                   <div>
                     <h4 className="text-white/40 uppercase tracking-[0.2em] text-[10px] md:text-xs font-bold mb-2">{item.label}</h4>
-                    <p className="text-xl text-white font-outfit">{item.value}</p>
+                    <p className="text-base md:text-xl text-white font-outfit">{item.value}</p>
                   </div>
                 </div>
               ))}
@@ -54,40 +54,40 @@ export const ContactSection = () => {
           </div>
 
           <div className="lg:col-span-7">
-            <div className="glass-premium p-8 md:p-16 rounded-[3rem] relative overflow-hidden">
+            <div className="glass-premium p-6 md:p-16 rounded-[2rem] md:rounded-[3rem] relative overflow-hidden">
               <AnimatePresence mode="wait">
                 {!submitted ? (
-                  <motion.form 
+                  <motion.form
                     key="form"
                     initial={{ opacity: 1 }}
                     exit={{ opacity: 0, y: -20 }}
-                    onSubmit={handleSubmit} 
-                    className="space-y-8"
+                    onSubmit={handleSubmit}
+                    className="space-y-6 md:space-y-8"
                   >
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                       <div className="space-y-4">
                         <label className="text-white/40 text-[10px] md:text-xs uppercase tracking-[0.3em] ml-1 font-bold">Full Identity</label>
-                        <input 
+                        <input
                           required
-                          type="text" 
-                          className="w-full bg-white/[0.03] border border-white/10 rounded-2xl px-6 py-5 text-white focus:border-royal outline-none transition-all duration-500 placeholder:text-white/10"
+                          type="text"
+                          className="w-full bg-white/[0.03] border border-white/10 rounded-2xl px-5 py-4 md:px-6 md:py-5 text-white focus:border-royal outline-none transition-all duration-500 placeholder:text-white/10"
                           placeholder="Your Full Name"
                         />
                       </div>
                       <div className="space-y-4">
                         <label className="text-white/40 text-[10px] md:text-xs uppercase tracking-[0.3em] ml-1 font-bold">Digital Address</label>
-                        <input 
+                        <input
                           required
-                          type="email" 
-                          className="w-full bg-white/[0.03] border border-white/10 rounded-2xl px-6 py-5 text-white focus:border-royal outline-none transition-all duration-500 placeholder:text-white/10"
+                          type="email"
+                          className="w-full bg-white/[0.03] border border-white/10 rounded-2xl px-5 py-4 md:px-6 md:py-5 text-white focus:border-royal outline-none transition-all duration-500 placeholder:text-white/10"
                           placeholder="email@luxury.com"
                         />
                       </div>
                     </div>
-                    
+
                     <div className="space-y-4">
                       <label className="text-white/40 text-[10px] md:text-xs uppercase tracking-[0.3em] ml-1 font-bold">Bespoke Service</label>
-                      <select required className="w-full bg-white/[0.03] border border-white/10 rounded-2xl px-6 py-5 text-white focus:border-royal outline-none transition-all duration-500 appearance-none cursor-pointer">
+                      <select required className="w-full bg-white/[0.03] border border-white/10 rounded-2xl px-5 py-4 md:px-6 md:py-5 text-white focus:border-royal outline-none transition-all duration-500 appearance-none cursor-pointer">
                         <option value="" className="bg-midnight">Select Service Pathway</option>
                         <option value="student" className="bg-midnight">Elite Student Placement</option>
                         <option value="pr" className="bg-midnight">Global Residency (PR)</option>
@@ -95,21 +95,21 @@ export const ContactSection = () => {
                         <option value="work" className="bg-midnight">Expert Work Permit</option>
                       </select>
                     </div>
-                    
+
                     <div className="space-y-4">
                       <label className="text-white/40 text-[10px] md:text-xs uppercase tracking-[0.3em] ml-1 font-bold">Inquiry Details</label>
-                      <textarea 
+                      <textarea
                         required
                         rows={5}
-                        className="w-full bg-white/[0.03] border border-white/10 rounded-2xl px-6 py-5 text-white focus:border-royal outline-none transition-all duration-500 placeholder:text-white/10 resize-none"
+                        className="w-full bg-white/[0.03] border border-white/10 rounded-2xl px-5 py-4 md:px-6 md:py-5 text-white focus:border-royal outline-none transition-all duration-500 placeholder:text-white/10 resize-none"
                         placeholder="Tell us about your global aspirations..."
                       />
                     </div>
-                    
-                    <PremiumButton 
-                      type="submit" 
-                      variant="gold" 
-                      className="w-full py-6 text-xl rounded-2xl"
+
+                    <PremiumButton
+                      type="submit"
+                      variant="gold"
+                      className="w-full py-5 md:py-6 text-lg md:text-xl rounded-2xl"
                       disabled={loading}
                     >
                       {loading ? "Processing..." : "Submit Secure Inquiry"}

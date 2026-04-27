@@ -8,9 +8,9 @@ import * as THREE from "three";
 function GlobeContent() {
   const meshRef = useRef<THREE.Mesh>(null);
 
-  useFrame(() => {
+  useFrame((state) => {
     if (meshRef.current) {
-      meshRef.current.rotation.y += 0.005;
+      meshRef.current.rotation.y = state.clock.getElapsedTime() * 0.15;
     }
   });
 
@@ -44,7 +44,7 @@ export default function Globe() {
     <div className="w-full h-full">
       <Canvas camera={{ position: [0, 0, 8], fov: 45 }}>
         <GlobeContent />
-        <OrbitControls enableZoom={false} autoRotate autoRotateSpeed={0.5} />
+        <OrbitControls enableZoom={false} autoRotate={false} />
       </Canvas>
     </div>
   );

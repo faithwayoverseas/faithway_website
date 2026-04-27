@@ -35,7 +35,7 @@ export const WhyFaithway = () => {
       <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-gold/5 blur-[100px] -z-10" />
       
       <div className="container-custom">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 md:gap-16 items-start">
           <div className="lg:col-span-5">
             <SectionTitle
               title="The Standard of Excellence"
@@ -43,7 +43,7 @@ export const WhyFaithway = () => {
               align="left"
               className="mb-0"
             />
-            <p className="text-xl text-white/50 mt-8 mb-12 font-light leading-relaxed">
+            <p className="text-lg md:text-xl text-white/50 mt-4 md:mt-8 mb-8 md:mb-12 font-light leading-relaxed">
               We don&apos;t just process visas; we architect legacies. Our commitment to absolute integrity and elite service sets a new global benchmark in immigration consultancy.
             </p>
             <PremiumButton variant="outline" className="px-10">
@@ -61,11 +61,11 @@ export const WhyFaithway = () => {
                 transition={{ delay: i * 0.1, duration: 1, ease: [0.23, 1, 0.32, 1] }}
                 className="group"
               >
-                <div className="glass-card p-10 h-full rounded-[2.5rem] hover:bg-white/[0.07] hover:-translate-y-2">
-                  <div className="w-16 h-16 rounded-2xl bg-royal/10 flex items-center justify-center text-3xl mb-8 group-hover:bg-royal group-hover:text-white transition-all duration-500">
+                <div className="glass-card p-6 md:p-10 h-full rounded-[2rem] md:rounded-[2.5rem] hover:bg-white/[0.07] hover:-translate-y-2">
+                  <div className="w-12 h-12 md:w-16 md:h-16 rounded-xl md:rounded-2xl bg-royal/10 flex items-center justify-center text-2xl md:text-3xl mb-6 md:mb-8 group-hover:bg-royal group-hover:text-white transition-all duration-500">
                     {feature.icon}
                   </div>
-                  <h3 className="text-2xl font-bold text-white mb-4 font-outfit tracking-tight">{feature.title}</h3>
+                  <h3 className="text-xl md:text-2xl font-bold text-white mb-2 md:mb-4 font-outfit tracking-tight">{feature.title}</h3>
                   <p className="text-white/40 leading-relaxed group-hover:text-white/70 transition-colors">{feature.desc}</p>
                 </div>
               </motion.div>

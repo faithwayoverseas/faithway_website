@@ -104,7 +104,7 @@
   }
 
   .section-padding {
-    @apply py-24 md:py-32 lg:py-48;
+    @apply py-16 md:py-32 lg:py-48;
   }
 
   .container-custom {

@@ -42,7 +42,7 @@ export const Testimonials = () => {
               viewport={{ once: true }}
               transition={{ delay: i * 0.1, duration: 1, ease: [0.23, 1, 0.32, 1] }}
             >
-              <div className="glass-card p-12 h-full rounded-[3rem] relative group hover:bg-white/[0.07] transition-all duration-700">
+              <div className="glass-card p-6 md:p-12 h-full rounded-[2rem] md:rounded-[3rem] relative group hover:bg-white/[0.07] transition-all duration-700">
                 {/* Quote Icon */}
                 <div className="text-6xl text-gold/10 absolute top-8 right-10 select-none group-hover:text-gold/20 transition-colors">&quot;</div>
                 
@@ -52,12 +52,12 @@ export const Testimonials = () => {
                   ))}
                 </div>
                 
-                <p className="text-xl md:text-2xl text-white/60 mb-12 font-light italic leading-relaxed group-hover:text-white transition-colors">
+                <p className="text-lg md:text-2xl text-white/60 mb-8 md:mb-12 font-light italic leading-relaxed group-hover:text-white transition-colors">
                   {test.content}
                 </p>
                 
                 <div className="flex items-center gap-6 mt-auto">
-                  <div className="w-16 h-16 rounded-2xl bg-royal/20 border border-white/10 flex items-center justify-center text-2xl font-bold font-outfit text-royal">
+                  <div className="w-12 h-12 md:w-16 md:h-16 rounded-xl md:rounded-2xl bg-royal/20 border border-white/10 flex items-center justify-center text-xl md:text-2xl font-bold font-outfit text-royal">
                     {test.name[0]}
                   </div>
                   <div>
