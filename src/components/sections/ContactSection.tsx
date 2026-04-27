@@ -5,10 +5,12 @@ import { motion, AnimatePresence } from "framer-motion";
 import { SectionTitle } from "../ui/SectionTitle";
 import { PremiumButton } from "../ui/PremiumButton";
 import { submitInquiry } from "@/app/actions";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
 
 export const ContactSection = () => {
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
+  const { settings } = useSiteSettings();
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -42,10 +44,10 @@ export const ContactSection = () => {
 
             <div className="space-y-8 md:space-y-12">
               {[
-                { icon: "📍", label: "India Support Desk", value: "Bairamalguda Rd, Sri Venkateshwara Colony, Hyderabad - 500079", href: "https://maps.google.com/?q=Bairamalguda+Rd+Sri+Venkateshwara+Colony+Hyderabad+500079" },
-                { icon: "✉️", label: "Official Email", value: "faithwayoverseas@gmail.com", href: "mailto:faithwayoverseas@gmail.com" },
-                { icon: "📞", label: "UAE Regional Office", value: "+971 50 888 1754", href: "tel:+971508881754" },
-                { icon: "📞", label: "India Support Desk", value: "+91 72075 89444", href: "tel:+917207589444" },
+                { icon: "📍", label: "Global HQ", value: settings.office_address, href: `https://maps.google.com/?q=${encodeURIComponent(settings.office_address)}` },
+                { icon: "✉️", label: "Official Email", value: settings.contact_email, href: `mailto:${settings.contact_email}` },
+                { icon: "📞", label: "Primary Phone", value: settings.phone_primary, href: `tel:${settings.phone_primary}` },
+                { icon: "📞", label: "WhatsApp Support", value: settings.phone_whatsapp, href: `https://wa.me/${settings.phone_whatsapp.replace(/[^0-9]/g, '')}` },
               ].map((item) => (
                 <a key={item.label} href={item.href} target={item.href.startsWith("http") ? "_blank" : undefined} rel="noopener noreferrer" className="flex gap-6 md:gap-8 group">
                   <div className="w-12 h-12 md:w-16 md:h-16 rounded-2xl md:rounded-[1.5rem] glass flex items-center justify-center text-xl md:text-2xl group-hover:bg-royal transition-all duration-500">

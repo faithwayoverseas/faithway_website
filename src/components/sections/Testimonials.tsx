@@ -2,6 +2,9 @@
 
 import { motion } from "framer-motion";
 import { SectionTitle } from "../ui/SectionTitle";
+import { createClient } from "@/lib/supabase/client";
+import { useEffect, useState } from "react";
+import { Testimonial } from "@/lib/types";
 
 const testimonials = [
   {
@@ -25,6 +28,28 @@ const testimonials = [
 ];
 
 export const Testimonials = () => {
+  const [activeTestimonials, setActiveTestimonials] = useState<Testimonial[] | typeof testimonials>(testimonials);
+
+  useEffect(() => {
+    async function loadTestimonials() {
+      try {
+        const supabase = createClient();
+        const { data, error } = await supabase
+          .from("testimonials")
+          .select("*")
+          .eq("is_published", true)
+          .order("created_at", { ascending: false });
+
+        if (!error && data && data.length > 0) {
+          setActiveTestimonials(data);
+        }
+      } catch (err) {
+        console.error("Error loading testimonials:", err);
+      }
+    }
+    loadTestimonials();
+  }, []);
+
   return (
     <section id="testimonials" className="section-padding bg-midnight/50 relative overflow-hidden">
       <div className="container-custom">
@@ -34,7 +59,7 @@ export const Testimonials = () => {
         />
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-12">
-          {testimonials.map((test, i) => (
+          {activeTestimonials.map((test, i) => (
             <motion.div
               key={test.name}
               initial={{ opacity: 0, y: 30 }}

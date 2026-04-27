@@ -22,7 +22,7 @@ import { Inquiry, InquiryStatus } from "@/lib/types";
 import { exportToCSV } from "@/lib/csv";
 import { cn } from "@/lib/utils";
 
-const statusConfig: Record<InquiryStatus, { color: string; icon: any }> = {
+const statusConfig: Record<InquiryStatus, { color: string; icon: React.ComponentType<{ size?: number }> }> = {
   'New': { color: 'text-blue-400 bg-blue-400/10 border-blue-400/20', icon: AlertCircle },
   'Contacted': { color: 'text-gold bg-gold/10 border-gold/20', icon: Clock },
   'In Progress': { color: 'text-royal bg-royal/10 border-royal/20', icon: RotateCcw },
@@ -37,11 +37,6 @@ export default function InquiriesPage() {
   const [statusFilter, setStatusFilter] = useState<InquiryStatus | "All">("All");
   const supabase = createClient();
 
-  useEffect(() => {
-    fetchInquiries();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   async function fetchInquiries() {
     setLoading(true);
     const { data, error } = await supabase
@@ -52,6 +47,11 @@ export default function InquiriesPage() {
     if (data) setInquiries(data);
     setLoading(false);
   }
+
+  useEffect(() => {
+    // eslint-disable-next-line
+    fetchInquiries();
+  }, []);
 
   const filteredInquiries = inquiries.filter(item => {
     const matchesSearch = 
@@ -99,7 +99,7 @@ export default function InquiriesPage() {
           <Filter className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20" size={20} />
           <select
             value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value as any)}
+            onChange={(e) => setStatusFilter(e.target.value as InquiryStatus | "All")}
             className="w-full bg-white/[0.03] border border-white/10 rounded-2xl pl-12 pr-6 py-4 text-white focus:border-royal outline-none transition-all appearance-none cursor-pointer"
           >
             <option value="All" className="bg-midnight">All Statuses</option>

@@ -1,7 +1,12 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
 
 export const Footer = () => {
+  const { settings } = useSiteSettings();
+
   return (
     <footer className="bg-midnight pt-32 pb-12 relative overflow-hidden">
       {/* Background glow */}
@@ -70,18 +75,18 @@ export const Footer = () => {
             <h4 className="text-white font-bold mb-8 uppercase tracking-[0.2em] text-xs">Contact</h4>
             <ul className="space-y-4">
               <li>
-                <a href="mailto:faithwayoverseas@gmail.com" className="text-white/40 hover:text-gold transition-colors font-light text-sm block">
-                  Email Us
+                <a href={`mailto:${settings.contact_email}`} className="text-white/40 hover:text-gold transition-colors font-light text-sm block">
+                  {settings.contact_email}
                 </a>
               </li>
               <li>
-                <a href="tel:+971508881754" className="text-white/40 hover:text-gold transition-colors font-light text-sm block">
-                  UAE Support
+                <a href={`tel:${settings.phone_primary}`} className="text-white/40 hover:text-gold transition-colors font-light text-sm block">
+                  {settings.phone_primary}
                 </a>
               </li>
               <li>
-                <a href="tel:+917207589444" className="text-white/40 hover:text-gold transition-colors font-light text-sm block">
-                  India Support
+                <a href={`tel:${settings.phone_whatsapp}`} className="text-white/40 hover:text-gold transition-colors font-light text-sm block">
+                  WhatsApp Support
                 </a>
               </li>
             </ul>

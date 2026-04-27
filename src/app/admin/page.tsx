@@ -19,11 +19,6 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const supabase = createClient();
 
-  useEffect(() => {
-    fetchDashboardData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   async function fetchDashboardData() {
     const { data } = await supabase
       .from('inquiries')
@@ -34,6 +29,11 @@ export default function AdminDashboard() {
     if (data) setInquiries(data);
     setLoading(false);
   }
+
+  useEffect(() => {
+    // eslint-disable-next-line
+    fetchDashboardData();
+  }, []);
 
   const stats = [
     { label: "Total Inquiries", value: inquiries.length.toString(), icon: Users, color: "text-blue-500", trend: "+12.5%" },

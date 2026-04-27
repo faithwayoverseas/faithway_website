@@ -6,6 +6,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { PremiumButton } from "../ui/PremiumButton";
 import { cn } from "@/lib/utils";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
 
 const navLinks = [
   { name: "Services", href: "#services" },
@@ -18,6 +19,7 @@ const navLinks = [
 export const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { settings } = useSiteSettings();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -132,9 +134,8 @@ export const Navbar = () => {
               </PremiumButton>
               
               <div className="flex justify-center gap-10">
-                <a href="tel:+971508881754" className="text-white/40 hover:text-gold transition-colors text-sm uppercase tracking-widest font-bold">UAE</a>
-                <a href="tel:+917207589444" className="text-white/40 hover:text-gold transition-colors text-sm uppercase tracking-widest font-bold">India</a>
-                <a href="https://wa.me/971508881754" className="text-gold transition-colors text-sm uppercase tracking-widest font-bold">WhatsApp</a>
+                <a href={`tel:${settings.phone_primary}`} className="text-white/40 hover:text-gold transition-colors text-sm uppercase tracking-widest font-bold">Call</a>
+                <a href={`https://wa.me/${settings.phone_whatsapp.replace(/[^0-9]/g, '')}`} className="text-gold transition-colors text-sm uppercase tracking-widest font-bold">WhatsApp</a>
               </div>
             </motion.div>
           </motion.div>

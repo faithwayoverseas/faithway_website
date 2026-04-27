@@ -4,6 +4,9 @@ import { motion } from "framer-motion";
 import { SectionTitle } from "../ui/SectionTitle";
 import { PremiumButton } from "../ui/PremiumButton";
 import { cn } from "@/lib/utils";
+import { createClient } from "@/lib/supabase/client";
+import { useEffect, useState } from "react";
+import { Service } from "@/lib/types";
 
 const services = [
   {
@@ -33,6 +36,28 @@ const services = [
 ];
 
 export const ServicesShowcase = () => {
+  const [activeServices, setActiveServices] = useState<Service[] | typeof services>(services);
+
+  useEffect(() => {
+    async function loadServices() {
+      try {
+        const supabase = createClient();
+        const { data, error } = await supabase
+          .from("services")
+          .select("*")
+          .eq("is_active", true)
+          .order("order", { ascending: true });
+
+        if (!error && data && data.length > 0) {
+          setActiveServices(data);
+        }
+      } catch (err) {
+        console.error("Error loading services:", err);
+      }
+    }
+    loadServices();
+  }, []);
+
   return (
     <section id="services" className="section-padding bg-midnight/30">
       <div className="container-custom">
@@ -42,7 +67,7 @@ export const ServicesShowcase = () => {
         />
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-8 md:gap-12">
-          {services.map((service, i) => (
+          {activeServices.map((service, i) => (
             <motion.div
               key={service.title}
               initial={{ opacity: 0, y: 50 }}
@@ -57,7 +82,7 @@ export const ServicesShowcase = () => {
               <div className="glass-card h-full flex flex-col p-6 md:p-12 group hover:bg-white/[0.05] relative overflow-hidden rounded-[2rem] md:rounded-[3rem]">
                 <div className="text-4xl md:text-6xl mb-6 md:mb-12 transform group-hover:scale-110 group-hover:-rotate-12 transition-transform duration-700 w-fit">{service.icon}</div>
                 <h3 className="text-2xl md:text-4xl font-bold text-white mb-3 md:mb-6 font-outfit tracking-tighter">{service.title}</h3>
-                <p className="text-base md:text-xl mb-6 md:mb-12 leading-relaxed font-light group-hover:text-white/70 transition-colors">{service.desc}</p>
+                <p className="text-base md:text-xl mb-6 md:mb-12 leading-relaxed font-light group-hover:text-white/70 transition-colors">{('description' in service ? service.description : undefined) || (service as { desc?: string }).desc}</p>
                 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4 mb-6 md:mb-12 flex-grow">
                   {service.benefits.map((benefit) => (

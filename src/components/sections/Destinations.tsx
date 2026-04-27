@@ -2,6 +2,9 @@
 
 import { motion } from "framer-motion";
 import { SectionTitle } from "../ui/SectionTitle";
+import { createClient } from "@/lib/supabase/client";
+import { useEffect, useState } from "react";
+import { Destination } from "@/lib/types";
 
 const destinations = [
   { name: "Canada", code: "CA", desc: "Express Entry, PNP, and Study Permits.", image: "/destinations/canada.png" },
@@ -13,6 +16,27 @@ const destinations = [
 ];
 
 export const Destinations = () => {
+  const [activeDestinations, setActiveDestinations] = useState<Destination[] | typeof destinations>(destinations);
+
+  useEffect(() => {
+    async function loadDestinations() {
+      try {
+        const supabase = createClient();
+        const { data, error } = await supabase
+          .from("destinations")
+          .select("*")
+          .order("is_featured", { ascending: false });
+
+        if (!error && data && data.length > 0) {
+          setActiveDestinations(data);
+        }
+      } catch (err) {
+        console.error("Error loading destinations:", err);
+      }
+    }
+    loadDestinations();
+  }, []);
+
   return (
     <section id="destinations" className="section-padding relative">
       <div className="container-custom">
@@ -22,7 +46,7 @@ export const Destinations = () => {
         />
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-12">
-          {destinations.map((dest, i) => (
+          {activeDestinations.map((dest, i) => (
             <motion.div
               key={dest.name}
               initial={{ opacity: 0, y: 50 }}
@@ -35,7 +59,7 @@ export const Destinations = () => {
                 {/* Background Image */}
                 <div 
                   className="absolute inset-0 bg-cover bg-center transition-transform duration-1000 group-hover:scale-110"
-                  style={{ backgroundImage: `url(${dest.image})` }}
+                  style={{ backgroundImage: `url(${('image_url' in dest ? dest.image_url : undefined) || (dest as { image?: string }).image})` }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-midnight via-midnight/20 to-transparent opacity-80" />
                 
@@ -47,7 +71,7 @@ export const Destinations = () => {
                   </div>
                   
                   <p className="text-white/70 text-sm md:text-base mb-6 md:mb-8 line-clamp-2 transform translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500">
-                    {dest.desc}
+                    {('description' in dest ? dest.description : undefined) || (dest as { desc?: string }).desc}
                   </p>
                   
                   <div className="w-12 h-12 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/20 group-hover:bg-royal group-hover:border-royal transition-all duration-500">

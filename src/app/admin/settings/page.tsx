@@ -20,7 +20,7 @@ const DEFAULT_SETTINGS: Omit<Setting, "value">[] = [
   { key: "website_url", description: "Public website URL" },
 ];
 
-const ICONS: Record<string, any> = {
+const ICONS: Record<string, React.ComponentType<{ size?: number }>> = {
   business_email: Mail,
   phone_uae: Phone,
   phone_india: Phone,
@@ -66,7 +66,7 @@ export default function SettingsPage() {
   };
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line
     fetchSettings();
   }, []);
 
