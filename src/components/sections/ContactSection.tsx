@@ -4,19 +4,25 @@ import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { SectionTitle } from "../ui/SectionTitle";
 import { PremiumButton } from "../ui/PremiumButton";
+import { submitInquiry } from "@/app/actions";
 
 export const ContactSection = () => {
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
-    // Simulate API call
-    setTimeout(() => {
-      setLoading(false);
+    
+    const formData = new FormData(e.currentTarget);
+    const result = await submitInquiry(formData);
+    
+    setLoading(false);
+    if (result.success) {
       setSubmitted(true);
-    }, 1500);
+    } else {
+      alert(result.error);
+    }
   };
 
   return (
@@ -70,6 +76,7 @@ export const ContactSection = () => {
                         <label className="text-white/40 text-[10px] md:text-xs uppercase tracking-[0.3em] ml-1 font-bold">Full Identity</label>
                         <input
                           required
+                          name="name"
                           type="text"
                           className="w-full bg-white/[0.03] border border-white/10 rounded-2xl px-5 py-4 md:px-6 md:py-5 text-white focus:border-royal outline-none transition-all duration-500 placeholder:text-white/10"
                           placeholder="Your Full Name"
@@ -79,6 +86,7 @@ export const ContactSection = () => {
                         <label className="text-white/40 text-[10px] md:text-xs uppercase tracking-[0.3em] ml-1 font-bold">Digital Address</label>
                         <input
                           required
+                          name="email"
                           type="email"
                           className="w-full bg-white/[0.03] border border-white/10 rounded-2xl px-5 py-4 md:px-6 md:py-5 text-white focus:border-royal outline-none transition-all duration-500 placeholder:text-white/10"
                           placeholder="email@luxury.com"
@@ -88,7 +96,11 @@ export const ContactSection = () => {
 
                     <div className="space-y-4">
                       <label className="text-white/40 text-[10px] md:text-xs uppercase tracking-[0.3em] ml-1 font-bold">Bespoke Service</label>
-                      <select required className="w-full bg-white/[0.03] border border-white/10 rounded-2xl px-5 py-4 md:px-6 md:py-5 text-white focus:border-royal outline-none transition-all duration-500 appearance-none cursor-pointer">
+                      <select 
+                        required 
+                        name="service"
+                        className="w-full bg-white/[0.03] border border-white/10 rounded-2xl px-5 py-4 md:px-6 md:py-5 text-white focus:border-royal outline-none transition-all duration-500 appearance-none cursor-pointer"
+                      >
                         <option value="" className="bg-midnight">Select Service Pathway</option>
                         <option value="student" className="bg-midnight">Elite Student Placement</option>
                         <option value="pr" className="bg-midnight">Global Residency (PR)</option>
@@ -101,6 +113,7 @@ export const ContactSection = () => {
                       <label className="text-white/40 text-[10px] md:text-xs uppercase tracking-[0.3em] ml-1 font-bold">Inquiry Details</label>
                       <textarea
                         required
+                        name="details"
                         rows={5}
                         className="w-full bg-white/[0.03] border border-white/10 rounded-2xl px-5 py-4 md:px-6 md:py-5 text-white focus:border-royal outline-none transition-all duration-500 placeholder:text-white/10 resize-none"
                         placeholder="Tell us about your global aspirations..."
