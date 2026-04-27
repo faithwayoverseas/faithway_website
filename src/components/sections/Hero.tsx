@@ -13,7 +13,7 @@ export const Hero = () => {
   };
 
   return (
-    <section className="relative min-h-screen lg:min-h-[110vh] flex items-center pt-24 md:pt-32 pb-16 md:pb-24 overflow-hidden">
+    <section className="relative min-h-screen lg:min-h-[110vh] flex items-center pt-16 md:pt-32 pb-12 md:pb-24 overflow-hidden">
       {/* Background elements */}
       <div className="absolute top-0 right-0 w-full lg:w-3/5 h-[40vh] lg:h-full -z-10 opacity-50 lg:opacity-100">
         <div className="absolute inset-0 bg-gradient-to-t from-midnight via-transparent to-transparent lg:hidden z-10" />
@@ -35,7 +35,7 @@ export const Hero = () => {
             </span>
           </motion.div>
 
-          <h1 className="text-4xl md:text-8xl lg:text-[10rem] font-bold font-outfit text-white mb-8 md:mb-12 leading-[1.1] md:leading-[0.9] tracking-tighter text-center lg:text-left">
+          <h1 className="text-[2.4rem] sm:text-5xl md:text-8xl lg:text-[10rem] font-bold font-outfit text-white mb-6 md:mb-12 leading-[1.05] md:leading-[0.9] tracking-tighter text-center lg:text-left">
             <motion.span
               initial={{ opacity: 0, x: -50 }}
               animate={{ opacity: 1, x: 0 }}
@@ -58,7 +58,7 @@ export const Hero = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 1, delay: 0.8 }}
-            className="text-lg md:text-2xl text-white/50 mb-8 md:mb-12 max-w-2xl mx-auto lg:mx-0 leading-relaxed font-light text-center lg:text-left"
+            className="text-base md:text-2xl text-white/50 mb-6 md:mb-12 max-w-2xl mx-auto lg:mx-0 leading-relaxed font-light text-center lg:text-left"
           >
             Experience the pinnacle of immigration consultancy. We turn global aspirations into reality with precision, integrity, and elite service.
           </motion.p>
@@ -71,7 +71,7 @@ export const Hero = () => {
           >
             <PremiumButton 
               variant="gold" 
-              className="text-lg md:text-xl px-10 md:px-12 py-4 md:py-6 min-w-[220px] md:min-w-[240px]"
+              className="text-base md:text-xl px-8 md:px-12 py-4 md:py-6 min-w-[200px] md:min-w-[240px]"
               onClick={scrollToContact}
             >
               Start Your Journey
@@ -91,7 +91,7 @@ export const Hero = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 1.5, duration: 1 }}
-            className="mt-16 md:mt-24 flex items-center gap-8 md:gap-12 justify-center lg:justify-start"
+            className="mt-10 md:mt-24 flex items-center gap-6 md:gap-12 justify-center lg:justify-start"
           >
             {[
               { label: "Experience", value: "15+" },

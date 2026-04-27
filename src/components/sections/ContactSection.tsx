@@ -44,10 +44,10 @@ export const ContactSection = () => {
 
             <div className="space-y-8 md:space-y-12">
               {[
-                { icon: "📍", label: "Global HQ", value: settings.office_address, href: `https://maps.google.com/?q=${encodeURIComponent(settings.office_address)}` },
+                { icon: "📍", label: "Global HQ", value: settings.office_address, href: `https://maps.google.com/?q=${encodeURIComponent(settings.office_address || '')}` },
                 { icon: "✉️", label: "Official Email", value: settings.contact_email, href: `mailto:${settings.contact_email}` },
-                { icon: "📞", label: "Primary Phone", value: settings.phone_primary, href: `tel:${settings.phone_primary}` },
-                { icon: "📞", label: "WhatsApp Support", value: settings.phone_whatsapp, href: `https://wa.me/${settings.phone_whatsapp.replace(/[^0-9]/g, '')}` },
+                { icon: "📞", label: "UAE Regional Office", value: settings.phone_uae, href: `tel:${settings.phone_uae}` },
+                { icon: "📞", label: "India Support Desk", value: settings.phone_india, href: `tel:${settings.phone_india}` },
               ].map((item) => (
                 <a key={item.label} href={item.href} target={item.href.startsWith("http") ? "_blank" : undefined} rel="noopener noreferrer" className="flex gap-6 md:gap-8 group">
                   <div className="w-12 h-12 md:w-16 md:h-16 rounded-2xl md:rounded-[1.5rem] glass flex items-center justify-center text-xl md:text-2xl group-hover:bg-royal transition-all duration-500">

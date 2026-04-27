@@ -8,14 +8,14 @@ export const WhatsAppButton = () => {
   
   return (
     <motion.a
-      href={`https://wa.me/${settings.phone_whatsapp.replace(/[^0-9]/g, '')}`}
+      href={`https://wa.me/${settings.whatsapp_number?.replace(/[^0-9]/g, '')}`}
       target="_blank"
       rel="noopener noreferrer"
       initial={{ scale: 0, opacity: 0 }}
       animate={{ scale: 1, opacity: 1 }}
       whileHover={{ scale: 1.1 }}
       whileTap={{ scale: 0.9 }}
-      className="fixed bottom-6 right-6 md:bottom-8 md:right-8 z-[100] w-12 h-12 md:w-16 md:h-16 bg-[#25D366] rounded-full flex items-center justify-center shadow-[0_10px_20px_rgba(37,211,102,0.4)] cursor-pointer"
+      className="fixed bottom-4 right-4 md:bottom-8 md:right-8 z-[100] w-12 h-12 md:w-16 md:h-16 bg-[#25D366] rounded-full flex items-center justify-center shadow-[0_10px_20px_rgba(37,211,102,0.4)] cursor-pointer"
     >
       <svg
         viewBox="0 0 24 24"

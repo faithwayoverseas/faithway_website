@@ -6,11 +6,12 @@ import { createClient } from "@/lib/supabase/client";
 // Hardcoded fallback data
 export const DEFAULT_SETTINGS = {
   business_name: "Faithway Overseas",
-  contact_email: "contact@faithwayoverseas.com",
-  phone_primary: "+1 (555) 123-4567",
-  phone_whatsapp: "+15551234567",
-  office_address: "123 Premium Blvd, Suite 400, Toronto, ON M5V 3L9",
-  working_hours: "Mon-Fri: 9:00 AM - 6:00 PM EST",
+  contact_email: "faithwayoverseas@gmail.com",
+  phone_uae: "+971 50 888 1754",
+  phone_india: "+91 72075 89444",
+  whatsapp_number: "971508881754",
+  office_address: "Bairamalguda Rd, Sri Venkateshwara Colony, Hyderabad - 500079",
+  working_hours: "Mon-Sat: 9:00 AM - 6:00 PM",
 };
 
 export function useSiteSettings() {

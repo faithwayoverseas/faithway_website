@@ -5,7 +5,7 @@ import { PremiumButton } from "../ui/PremiumButton";
 
 export const CTASection = () => {
   return (
-    <section className="section-padding relative overflow-hidden">
+    <section className="py-16 md:py-32 relative overflow-hidden">
       {/* Cinematic background */}
       <div className="absolute inset-0 bg-royal/10 -z-10" />
       <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_50%_50%,hsla(45,100%,50%,0.05),transparent_70%)] -z-10" />

@@ -80,13 +80,18 @@ export const Footer = () => {
                 </a>
               </li>
               <li>
-                <a href={`tel:${settings.phone_primary}`} className="text-white/40 hover:text-gold transition-colors font-light text-sm block">
-                  {settings.phone_primary}
+                <a href={`tel:${settings.phone_uae}`} className="text-white/40 hover:text-gold transition-colors font-light text-sm block">
+                  UAE: {settings.phone_uae}
                 </a>
               </li>
               <li>
-                <a href={`tel:${settings.phone_whatsapp}`} className="text-white/40 hover:text-gold transition-colors font-light text-sm block">
-                  WhatsApp Support
+                <a href={`tel:${settings.phone_india}`} className="text-white/40 hover:text-gold transition-colors font-light text-sm block">
+                  India: {settings.phone_india}
+                </a>
+              </li>
+              <li>
+                <a href={`https://wa.me/${settings.whatsapp_number?.replace(/[^0-9]/g, '')}`} className="text-gold hover:text-gold/80 transition-colors font-light text-sm block">
+                  WhatsApp Chat
                 </a>
               </li>
             </ul>

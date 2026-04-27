@@ -41,7 +41,7 @@ export const Navbar = () => {
     <nav
       className={cn(
         "fixed top-0 left-0 w-full z-[100] transition-all duration-500",
-        scrolled ? "py-2 md:py-4 bg-midnight/40 backdrop-blur-2xl border-b border-white/5" : "py-4 md:py-8 bg-transparent"
+        scrolled ? "py-2 md:py-4 bg-midnight/40 backdrop-blur-2xl border-b border-white/5" : "py-2 md:py-8 bg-transparent"
       )}
     >
       <div className="container mx-auto px-6 flex items-center justify-between">
@@ -50,7 +50,7 @@ export const Navbar = () => {
           onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: "smooth" }); }}
           className="flex items-center gap-3 group"
         >
-          <div className="relative w-8 h-8 md:w-12 md:h-12 overflow-hidden rounded-lg">
+          <div className="relative w-6 h-6 md:w-12 md:h-12 overflow-hidden rounded-md md:rounded-lg">
             <Image 
               src="/logo.png" 
               alt="Faithway Overseas Logo" 
@@ -58,7 +58,7 @@ export const Navbar = () => {
               className="object-cover group-hover:scale-110 transition-transform duration-300"
             />
           </div>
-          <span className="text-lg md:text-2xl font-outfit font-bold tracking-tight text-white">
+          <span className="text-base md:text-2xl font-outfit font-bold tracking-tight text-white">
             FAITHWAY<span className="text-gold">OVERSEAS</span>
           </span>
         </Link>
@@ -133,9 +133,10 @@ export const Navbar = () => {
                 Consult Now
               </PremiumButton>
               
-              <div className="flex justify-center gap-10">
-                <a href={`tel:${settings.phone_primary}`} className="text-white/40 hover:text-gold transition-colors text-sm uppercase tracking-widest font-bold">Call</a>
-                <a href={`https://wa.me/${settings.phone_whatsapp.replace(/[^0-9]/g, '')}`} className="text-gold transition-colors text-sm uppercase tracking-widest font-bold">WhatsApp</a>
+              <div className="flex flex-col items-center gap-4 mt-4">
+                <a href={`tel:${settings.phone_uae}`} className="text-white/40 hover:text-gold transition-colors text-xs uppercase tracking-widest font-bold">UAE Regional Office: {settings.phone_uae}</a>
+                <a href={`tel:${settings.phone_india}`} className="text-white/40 hover:text-gold transition-colors text-xs uppercase tracking-widest font-bold">India Support Desk: {settings.phone_india}</a>
+                <a href={`https://wa.me/${settings.whatsapp_number?.replace(/[^0-9]/g, '')}`} className="text-gold transition-colors text-xs uppercase tracking-widest font-bold">Direct WhatsApp Chat</a>
               </div>
             </motion.div>
           </motion.div>

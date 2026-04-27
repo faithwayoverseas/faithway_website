@@ -18,16 +18,16 @@ const inter = Inter({
 export const metadata: Metadata = {
   metadataBase: new URL('https://faithwayoverseas.com'),
   title: "Faithway Overseas | Elite Immigration & Global Residency",
-  description: "Faithway Overseas is a premium immigration consultancy providing elite visa services, citizenship by investment, and international career planning with absolute integrity.",
-  keywords: ["immigration", "visa", "PR", "citizenship by investment", "study abroad", "Canada PR", "Australia PR", "UK visa", "luxury consultancy"],
+  description: "Faithway Overseas is a premium immigration consultancy in Hyderabad providing elite visa services, citizenship by investment, and international career planning. Contact: faithwayoverseas@gmail.com | UAE: +971 50 888 1754 | India: +91 72075 89444",
+  keywords: ["immigration consultant Hyderabad", "visa", "PR", "citizenship by investment", "study abroad", "Canada PR", "Australia PR", "UK visa", "Faithway Overseas", "UAE immigration", "India immigration consultancy"],
   openGraph: {
     title: "Faithway Overseas | Elite Immigration & Global Residency",
-    description: "Your gateway to global opportunities with premium immigration services.",
+    description: "Your gateway to global opportunities. Premium immigration services from Hyderabad. UAE: +971 50 888 1754 | India: +91 72075 89444",
     url: "https://faithwayoverseas.com",
     siteName: "Faithway Overseas",
     images: [
       {
-        url: "/og-image.png", // Placeholder
+        url: "/og-image.png",
         width: 1200,
         height: 630,
       },
