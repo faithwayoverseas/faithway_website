@@ -72,16 +72,29 @@ export default function SettingsPage() {
 
   async function handleSave() {
     setSaving(true);
-    const upserts = Object.entries(settings).map(([key, text]) => ({
-      key,
-      value: { text },
-      description: DEFAULT_SETTINGS.find(s => s.key === key)?.description ?? key,
-    }));
+    try {
+      const upserts = Object.entries(settings).map(([key, text]) => ({
+        key,
+        value: { text },
+        description: DEFAULT_SETTINGS.find(s => s.key === key)?.description ?? key,
+      }));
 
-    await supabase.from("site_settings").upsert(upserts, { onConflict: "key" });
-    setSaving(false);
-    setSaved(true);
-    setTimeout(() => setSaved(false), 3000);
+      const { error } = await supabase.from("site_settings").upsert(upserts, { onConflict: "key" });
+      
+      if (error) {
+        console.error("Supabase Error:", error);
+        alert(`Error saving settings: ${error.message}`);
+      } else {
+        setSaved(true);
+        setTimeout(() => setSaved(false), 3000);
+      }
+    } catch (err) {
+      console.error("Unexpected Error:", err);
+      const msg = err instanceof Error ? err.message : String(err);
+      alert(`Unexpected error: ${msg}`);
+    } finally {
+      setSaving(false);
+    }
   }
 
   return (

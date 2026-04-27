@@ -41,13 +41,28 @@ export default function TestimonialsPage() {
 
   async function handleSave() {
     setSaving(true);
-    if (editing) {
-      await supabase.from("testimonials").update(formData).eq("id", editing.id);
-    } else {
-      await supabase.from("testimonials").insert([formData]);
+    try {
+      let result;
+      if (editing) {
+        result = await supabase.from("testimonials").update(formData).eq("id", editing.id);
+      } else {
+        result = await supabase.from("testimonials").insert([formData]);
+      }
+
+      if (result.error) {
+        console.error("Supabase Error:", result.error);
+        alert(`Error saving testimonial: ${result.error.message}`);
+      } else {
+        await fetchTestimonials();
+        closeForm();
+      }
+    } catch (err) {
+      console.error("Unexpected Error:", err);
+      const msg = err instanceof Error ? err.message : String(err);
+      alert(`Unexpected error: ${msg}`);
+    } finally {
+      setSaving(false);
     }
-    await fetchTestimonials();
-    closeForm(); setSaving(false);
   }
 
   async function togglePublished(t: Testimonial) {

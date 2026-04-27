@@ -50,27 +50,41 @@ export default function BlogManagerPage() {
 
   async function handleSave() {
     setSaving(true);
-    
-    // Auto-generate slug if empty
-    let finalSlug = formData.slug;
-    if (!finalSlug) {
-      finalSlug = generateSlug(formData.title);
-      setFormData(prev => ({ ...prev, slug: finalSlug }));
-    }
+    try {
+      // Auto-generate slug if empty
+      let finalSlug = formData.slug;
+      if (!finalSlug) {
+        finalSlug = generateSlug(formData.title);
+        setFormData(prev => ({ ...prev, slug: finalSlug }));
+      }
 
-    const payload = {
-      ...formData,
-      slug: finalSlug,
-      updated_at: new Date().toISOString()
-    };
+      const payload = {
+        ...formData,
+        slug: finalSlug,
+        updated_at: new Date().toISOString()
+      };
 
-    if (editing) {
-      await supabase.from("blog_posts").update(payload).eq("id", editing.id);
-    } else {
-      await supabase.from("blog_posts").insert([payload]);
+      let result;
+      if (editing) {
+        result = await supabase.from("blog_posts").update(payload).eq("id", editing.id);
+      } else {
+        result = await supabase.from("blog_posts").insert([payload]);
+      }
+
+      if (result.error) {
+        console.error("Supabase Error:", result.error);
+        alert(`Error saving blog post: ${result.error.message}`);
+      } else {
+        await fetchPosts();
+        closeForm();
+      }
+    } catch (err) {
+      console.error("Unexpected Error:", err);
+      const msg = err instanceof Error ? err.message : String(err);
+      alert(`Unexpected error: ${msg}`);
+    } finally {
+      setSaving(false);
     }
-    await fetchPosts();
-    closeForm(); setSaving(false);
   }
 
   async function togglePublished(p: BlogPost) {

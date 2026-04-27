@@ -51,15 +51,29 @@ export default function ServicesPage() {
 
   async function handleSave() {
     setSaving(true);
-    const payload = { ...formData, benefits: benefitsText.split("\n").map(b => b.trim()).filter(Boolean) };
-    if (editing) {
-      await supabase.from("services").update(payload).eq("id", editing.id);
-    } else {
-      await supabase.from("services").insert([payload]);
+    try {
+      const payload = { ...formData, benefits: benefitsText.split("\n").map(b => b.trim()).filter(Boolean) };
+      let result;
+      if (editing) {
+        result = await supabase.from("services").update(payload).eq("id", editing.id);
+      } else {
+        result = await supabase.from("services").insert([payload]);
+      }
+      
+      if (result.error) {
+        console.error("Supabase Error:", result.error);
+        alert(`Error saving service: ${result.error.message}`);
+      } else {
+        await fetchServices();
+        closeForm();
+      }
+    } catch (err) {
+      console.error("Unexpected Error:", err);
+      const msg = err instanceof Error ? err.message : String(err);
+      alert(`Unexpected error: ${msg}`);
+    } finally {
+      setSaving(false);
     }
-    await fetchServices();
-    closeForm();
-    setSaving(false);
   }
 
   async function toggleActive(s: Service) {
