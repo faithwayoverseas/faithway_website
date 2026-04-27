@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
+import Image from "next/image";
 import { PremiumButton } from "../ui/PremiumButton";
 import { cn } from "@/lib/utils";
 
@@ -45,15 +46,21 @@ export const Navbar = () => {
         <Link 
           href="/" 
           onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: "smooth" }); }}
-          className="flex items-center gap-2 group"
+          className="flex items-center gap-3 group"
         >
-          <div className="w-10 h-10 bg-royal rounded-lg flex items-center justify-center font-bold text-xl group-hover:rotate-12 transition-transform duration-300">
-            F
+          <div className="relative w-12 h-12 overflow-hidden rounded-lg">
+            <Image 
+              src="/logo.png" 
+              alt="Faithway Overseas Logo" 
+              fill
+              className="object-cover group-hover:scale-110 transition-transform duration-300"
+            />
           </div>
           <span className="text-2xl font-outfit font-bold tracking-tight text-white">
             FAITHWAY<span className="text-gold">OVERSEAS</span>
           </span>
         </Link>
+
 
         {/* Desktop Nav */}
         <div className="hidden lg:flex items-center gap-10">

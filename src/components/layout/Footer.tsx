@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 
 export const Footer = () => {
   return (
@@ -9,14 +10,20 @@ export const Footer = () => {
       <div className="container-custom">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-16 mb-24">
           <div className="lg:col-span-4">
-            <Link href="/" className="flex items-center gap-3 group mb-8">
-              <div className="w-12 h-12 bg-royal rounded-xl flex items-center justify-center font-bold text-2xl group-hover:rotate-12 transition-transform duration-300">
-                F
+            <Link href="/" className="flex items-center gap-4 group mb-8">
+              <div className="relative w-14 h-14 overflow-hidden rounded-xl">
+                <Image 
+                  src="/logo.png" 
+                  alt="Faithway Overseas Logo" 
+                  fill
+                  className="object-cover group-hover:scale-110 transition-transform duration-300"
+                />
               </div>
               <span className="text-3xl font-outfit font-bold tracking-tighter text-white">
                 FAITHWAY<span className="text-gold">OVERSEAS</span>
               </span>
             </Link>
+
             <p className="text-white/40 text-lg mb-10 leading-relaxed font-light">
               Crafting global legacies through elite immigration consultancy. We turn international aspirations into reality with precision and absolute integrity.
             </p>
