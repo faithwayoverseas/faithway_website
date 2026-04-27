@@ -18,6 +18,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://faithwayoverseas.com'),
   title: "Faithway Overseas | Elite Immigration & Global Residency",
   description: "Faithway Overseas is a premium immigration consultancy providing elite visa services, citizenship by investment, and international career planning with absolute integrity.",
   keywords: ["immigration", "visa", "PR", "citizenship by investment", "study abroad", "Canada PR", "Australia PR", "UK visa", "luxury consultancy"],
