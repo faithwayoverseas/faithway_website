@@ -1,14 +1,15 @@
 "use client";
 
 import { motion } from "framer-motion";
+import { getWhatsAppUrl } from "@/lib/whatsapp";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
 
 export const WhatsAppButton = () => {
   const { settings } = useSiteSettings();
-  
+
   return (
     <motion.a
-      href={`https://wa.me/${settings.whatsapp_number?.replace(/[^0-9]/g, '')}`}
+      href={getWhatsAppUrl(settings.whatsapp_number)}
       target="_blank"
       rel="noopener noreferrer"
       initial={{ scale: 0, opacity: 0 }}

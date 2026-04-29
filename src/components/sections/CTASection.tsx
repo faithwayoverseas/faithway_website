@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { PremiumButton } from "../ui/PremiumButton";
+import { getWhatsAppUrl } from "@/lib/whatsapp";
 
 export const CTASection = () => {
   return (
@@ -35,22 +36,29 @@ export const CTASection = () => {
             </p>
             
             <div className="flex flex-col sm:flex-row gap-8 justify-center items-center">
-              <PremiumButton 
-                variant="gold" 
-                className="text-lg md:text-xl px-10 md:px-16 py-5 md:py-8 rounded-[1.5rem] md:rounded-[2rem] shadow-[0_20px_50px_rgba(253,185,49,0.3)]"
-                onClick={() => document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" })}
+              <a
+                href={getWhatsAppUrl()}
+                target="_blank"
+                rel="noopener noreferrer"
               >
-                Book Free Consultation
-              </PremiumButton>
-              <button 
-                onClick={() => document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" })}
+                <PremiumButton
+                  variant="gold"
+                  className="text-lg md:text-xl px-10 md:px-16 py-5 md:py-8 rounded-[1.5rem] md:rounded-[2rem] shadow-[0_20px_50px_rgba(253,185,49,0.3)]"
+                >
+                  Book Free Consultation
+                </PremiumButton>
+              </a>
+              <a
+                href={getWhatsAppUrl()}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="text-white/60 hover:text-white transition-colors flex items-center gap-4 group text-lg tracking-widest uppercase font-bold"
               >
                 Check Eligibility
                 <span className="w-12 h-12 md:w-14 md:h-14 rounded-full border border-white/20 flex items-center justify-center group-hover:bg-royal group-hover:border-royal transition-all duration-500">
                   →
                 </span>
-              </button>
+              </a>
             </div>
           </motion.div>
         </div>

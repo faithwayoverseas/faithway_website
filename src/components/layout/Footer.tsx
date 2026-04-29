@@ -3,6 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
+import { getWhatsAppUrl } from "@/lib/whatsapp";
 
 export const Footer = () => {
   const { settings } = useSiteSettings();
@@ -90,7 +91,7 @@ export const Footer = () => {
                 </a>
               </li>
               <li>
-                <a href={`https://wa.me/${settings.whatsapp_number?.replace(/[^0-9]/g, '')}`} className="text-gold hover:text-gold/80 transition-colors font-light text-sm block">
+                <a href={getWhatsAppUrl(settings.whatsapp_number)} target="_blank" rel="noopener noreferrer" className="text-gold hover:text-gold/80 transition-colors font-light text-sm block">
                   WhatsApp Chat
                 </a>
               </li>

@@ -7,6 +7,7 @@ import Image from "next/image";
 import { PremiumButton } from "../ui/PremiumButton";
 import { cn } from "@/lib/utils";
 import { useSiteSettings } from "@/hooks/useSiteSettings";
+import { getWhatsAppUrl } from "@/lib/whatsapp";
 
 const navLinks = [
   { name: "Services", href: "#services" },
@@ -75,13 +76,15 @@ export const Navbar = () => {
               {link.name}
             </button>
           ))}
-          <PremiumButton 
-            variant="gold" 
-            className="px-6 py-2"
-            onClick={() => scrollToSection("#contact")}
+          <a
+            href={getWhatsAppUrl(settings.whatsapp_number)}
+            target="_blank"
+            rel="noopener noreferrer"
           >
-            Consult Now
-          </PremiumButton>
+            <PremiumButton variant="gold" className="px-6 py-2">
+              Consult Now
+            </PremiumButton>
+          </a>
         </div>
 
         {/* Mobile Toggle */}
@@ -125,18 +128,21 @@ export const Navbar = () => {
               transition={{ delay: 0.5 }}
               className="mt-8 w-full px-12 flex flex-col gap-6"
             >
-              <PremiumButton 
-                variant="gold" 
-                className="w-full py-6 text-xl"
-                onClick={() => scrollToSection("#contact")}
+              <a
+                href={getWhatsAppUrl(settings.whatsapp_number)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full block"
               >
-                Consult Now
-              </PremiumButton>
+                <PremiumButton variant="gold" className="w-full py-6 text-xl">
+                  Consult Now
+                </PremiumButton>
+              </a>
               
               <div className="flex flex-col items-center gap-4 mt-4">
                 <a href={`tel:${settings.phone_uae}`} className="text-white/40 hover:text-gold transition-colors text-xs uppercase tracking-widest font-bold">UAE Regional Office: {settings.phone_uae}</a>
                 <a href={`tel:${settings.phone_india}`} className="text-white/40 hover:text-gold transition-colors text-xs uppercase tracking-widest font-bold">India Support Desk: {settings.phone_india}</a>
-                <a href={`https://wa.me/${settings.whatsapp_number?.replace(/[^0-9]/g, '')}`} className="text-gold transition-colors text-xs uppercase tracking-widest font-bold">Direct WhatsApp Chat</a>
+                <a href={getWhatsAppUrl(settings.whatsapp_number)} target="_blank" rel="noopener noreferrer" className="text-gold transition-colors text-xs uppercase tracking-widest font-bold">Direct WhatsApp Chat</a>
               </div>
             </motion.div>
           </motion.div>

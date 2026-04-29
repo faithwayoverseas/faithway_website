@@ -3,15 +3,9 @@
 import { motion } from "framer-motion";
 import { PremiumButton } from "../ui/PremiumButton";
 import Globe from "../ui/Globe";
+import { getWhatsAppUrl } from "@/lib/whatsapp";
 
 export const Hero = () => {
-  const scrollToContact = () => {
-    const element = document.getElementById("contact");
-    if (element) {
-      element.scrollIntoView({ behavior: "smooth" });
-    }
-  };
-
   return (
     <section className="relative min-h-screen lg:min-h-[110vh] flex items-center pt-16 md:pt-32 pb-12 md:pb-24 overflow-hidden">
       {/* Background elements */}
@@ -69,13 +63,18 @@ export const Hero = () => {
             transition={{ duration: 1, delay: 1 }}
             className="flex flex-col sm:flex-row gap-6 md:gap-8 justify-center lg:justify-start items-center"
           >
-            <PremiumButton 
-              variant="gold" 
-              className="text-base md:text-xl px-8 md:px-12 py-4 md:py-6 min-w-[200px] md:min-w-[240px]"
-              onClick={scrollToContact}
+            <a
+              href={getWhatsAppUrl()}
+              target="_blank"
+              rel="noopener noreferrer"
             >
-              Start Your Journey
-            </PremiumButton>
+              <PremiumButton
+                variant="gold"
+                className="text-base md:text-xl px-8 md:px-12 py-4 md:py-6 min-w-[200px] md:min-w-[240px]"
+              >
+                Start Your Journey
+              </PremiumButton>
+            </a>
             <button 
               onClick={() => document.getElementById("destinations")?.scrollIntoView({ behavior: "smooth" })}
               className="text-white/60 hover:text-white transition-colors flex items-center gap-3 md:gap-4 group text-base md:text-lg tracking-widest uppercase font-bold"
