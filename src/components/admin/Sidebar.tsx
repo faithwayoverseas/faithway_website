@@ -9,6 +9,7 @@ import {
   Briefcase, 
   Globe2, 
   MessageSquare, 
+  ReceiptText,
   FileText, 
   Settings, 
   LogOut,
@@ -23,6 +24,7 @@ const menuItems = [
   { name: "Services", icon: Briefcase, href: "/admin/services" },
   { name: "Destinations", icon: Globe2, href: "/admin/destinations" },
   { name: "Testimonials", icon: MessageSquare, href: "/admin/testimonials" },
+  { name: "Invoices", icon: ReceiptText, href: "/admin/invoices" },
   { name: "Blog / SEO", icon: FileText, href: "/admin/blog" },
   { name: "Settings", icon: Settings, href: "/admin/settings" },
 ];

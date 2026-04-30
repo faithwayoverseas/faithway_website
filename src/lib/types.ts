@@ -56,3 +56,40 @@ export interface BlogPost {
   created_at: string;
   updated_at: string;
 }
+
+export type InvoiceCurrency = 'INR' | 'AED' | 'USD';
+
+export interface InvoiceSettings {
+  id: string;
+  company_name: string;
+  company_address: string;
+  company_phone: string;
+  company_email: string;
+  company_website: string;
+  logo_url: string | null;
+  signature_url: string | null;
+  stamp_url: string | null;
+  last_invoice_year: number;
+  last_invoice_serial: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Invoice {
+  id: string;
+  invoice_number: string;
+  invoice_date: string;
+  client_name: string;
+  client_address: string | null;
+  client_email: string | null;
+  service_name: string;
+  country: string | null;
+  description: string | null;
+  currency: InvoiceCurrency;
+  amount: number;
+  amount_in_words: string | null;
+  notes: string | null;
+  pdf_url: string | null;
+  created_at: string;
+  updated_at: string;
+}
