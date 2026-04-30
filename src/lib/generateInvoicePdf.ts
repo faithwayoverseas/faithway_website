@@ -148,13 +148,17 @@ export async function generateInvoicePdf(
   let by = y + 12;
   doc.setFont('helvetica', 'bold'); doc.setFontSize(14); doc.setTextColor(...NAVY);
   doc.text(invoice.client_name, MARGIN + 6, by);
+  
   by += 6;
   doc.setFont('helvetica', 'normal'); doc.setFontSize(9); doc.setTextColor(...GREY);
+  // Address lines (Country removed)
   const cAddrLines = doc.splitTextToSize(invoice.client_address || '', 110);
   doc.text(cAddrLines, MARGIN + 6, by);
+  
   by += (cAddrLines.length * 4.2);
   if (invoice.client_email) {
-    doc.setTextColor(...NAVY); doc.text(invoice.client_email, MARGIN + 6, by);
+    doc.setTextColor(...NAVY); 
+    doc.text(invoice.client_email, MARGIN + 6, by);
   }
 
   // Currency Card
