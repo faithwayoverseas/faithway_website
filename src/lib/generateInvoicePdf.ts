@@ -1,5 +1,5 @@
-// generateInvoicePdf.ts — Precision Alignment Premium Invoice Engine
-// FaithWay Overseas — Total Visual Overhaul
+// generateInvoicePdf.ts — Professional Commercial Grade PDF Engine
+// FaithWay Overseas — Content-Responsive Grid Reconstruction
 
 import { Invoice, InvoiceSettings } from '@/lib/types';
 
@@ -13,9 +13,9 @@ const DARK: [number, number, number] = [25, 25, 25];
 const GREY: [number, number, number] = [80, 80, 80];
 const WHITE: [number, number, number] = [255, 255, 255];
 
-const MARGIN = 15;
 const PAGE_W = 210;
 const PAGE_H = 297;
+const MARGIN = 14;
 const CONTENT_W = PAGE_W - (MARGIN * 2);
 
 // ── HELPERS ──────────────────────────────────────────────────────────────────
@@ -51,6 +51,83 @@ function currencyFormat(amount: number, currency: string): string {
   return `${sym} ${amount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
+// Layout Utility Class
+class LayoutEngine {
+  doc: any;
+  y: number;
+
+  constructor(doc: any) {
+    this.doc = doc;
+    this.y = MARGIN;
+  }
+
+  setY(val: number) { this.y = val; }
+  addY(val: number) { this.y += val; }
+
+  drawText(text: string | string[], x: number, y: number, options: any = {}) {
+    const { 
+      fontSize = 9, 
+      fontStyle = 'normal', 
+      color = DARK, 
+      align = 'left',
+      maxWidth = 0
+    } = options;
+    
+    this.doc.setFont('helvetica', fontStyle);
+    this.doc.setFontSize(fontSize);
+    this.doc.setTextColor(...color);
+
+    let output = text;
+    if (maxWidth > 0) {
+      output = this.doc.splitTextToSize(text, maxWidth);
+    }
+
+    this.doc.text(output, x, y, { align });
+    return Array.isArray(output) ? output.length : 1;
+  }
+
+  getWrappedHeight(text: string, width: number, fontSize: number, lineHeight: number = 1.2) {
+    this.doc.setFontSize(fontSize);
+    const lines = this.doc.splitTextToSize(text, width);
+    return lines.length * (fontSize * 0.3527) * lineHeight;
+  }
+
+  drawBox(x: number, y: number, w: number, h: number, options: any = {}) {
+    const { bgColor = null, borderColor = BORDER_GRAY, borderWidth = 0.2, radius = 0 } = options;
+    if (bgColor) {
+      this.doc.setFillColor(...bgColor);
+      if (radius > 0) this.doc.roundedRect(x, y, w, h, radius, radius, 'F');
+      else this.doc.rect(x, y, w, h, 'F');
+    }
+    if (borderColor) {
+      this.doc.setDrawColor(...borderColor);
+      this.doc.setLineWidth(borderWidth);
+      if (radius > 0) this.doc.roundedRect(x, y, w, h, radius, radius, 'S');
+      else this.doc.rect(x, y, w, h, 'S');
+    }
+  }
+
+  drawPill(x: number, y: number, w: number, h: number, text: string, options: any = {}) {
+    const { bgColor = NAVY, textColor = WHITE, fontSize = 7, radius = 1 } = options;
+    this.doc.setFillColor(...bgColor);
+    this.doc.roundedRect(x, y, w, h, radius, radius, 'F');
+    this.doc.setFontSize(fontSize);
+    this.doc.setFont('helvetica', 'bold');
+    this.doc.setTextColor(...textColor);
+    this.doc.text(text.toUpperCase(), x + w/2, y + (h/2) + (fontSize * 0.3527 / 2) - 0.2, { align: 'center' });
+  }
+
+  drawImageContain(img: LoadedImage, x: number, y: number, maxW: number, maxH: number) {
+    const ratio = img.width / img.height;
+    let w = maxW, h = maxH;
+    if (ratio > (maxW/maxH)) h = maxW / ratio;
+    else w = maxH * ratio;
+    const dx = x + (maxW - w) / 2;
+    const dy = y + (maxH - h) / 2;
+    this.doc.addImage(img.data, 'PNG', dx, dy, w, h);
+  }
+}
+
 // ── MAIN EXPORT ──────────────────────────────────────────────────────────────
 
 export async function generateInvoicePdf(
@@ -59,6 +136,7 @@ export async function generateInvoicePdf(
 ): Promise<Blob> {
   const { default: jsPDF } = await import('jspdf');
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+  const L = new LayoutEngine(doc);
 
   // Load Assets
   const logo = settings?.logo_url ? await safeImageLoader(settings.logo_url) : null;
@@ -73,256 +151,221 @@ export async function generateInvoicePdf(
     website: settings?.company_website || 'www.faithwayoverseas.com',
   };
 
-  let y = MARGIN;
+  const col1_w = 65; 
+  const col2_w = 60;
+  const col3_w = CONTENT_W - col1_w - col2_w; // 57mm
 
-  // ── HEADER RECONSTRUCTION (3 COLUMNS) ────────────────────────────────────
+  // ── HEADER ─────────────────────────────────────────────────────────────────
 
-  const col1_w = 70; // Branding
-  const col2_w = 60; // Contact
-  const col3_w = CONTENT_W - col1_w - col2_w; 
+  const headerStartY = MARGIN;
+  const headerH = 45;
 
-  // 1. Branding
-  const logoMaxW = 55;
-  const logoMaxH = 28;
+  // Column 1: Branding
   if (logo) {
-    const ratio = logo.width / logo.height;
-    let rW = logoMaxW, rH = logoMaxH;
-    if (ratio > (logoMaxW/logoMaxH)) rH = logoMaxW / ratio; else rW = logoMaxH * ratio;
-    doc.addImage(logo.data, 'PNG', MARGIN + (col1_w - rW)/2, y, rW, rH);
+    L.drawImageContain(logo, MARGIN, headerStartY, col1_w - 5, 25);
   } else {
-    doc.setFont('helvetica', 'bold'); doc.setFontSize(22); doc.setTextColor(...NAVY);
-    doc.text('FAITHWAY', MARGIN + col1_w/2, y + 15, { align: 'center' });
+    L.drawText('FAITHWAY', MARGIN + (col1_w - 5)/2, headerStartY + 15, { fontSize: 22, fontStyle: 'bold', color: NAVY, align: 'center' });
   }
+  const brandingY = headerStartY + 28;
+  L.drawText('FAITHWAY OVERSEAS & IMMIGRATION', MARGIN + (col1_w - 5)/2, brandingY, { fontSize: 10, fontStyle: 'bold', color: NAVY, align: 'center' });
+  L.drawText('Your Trusted Partner For Global Opportunities', MARGIN + (col1_w - 5)/2, brandingY + 4, { fontSize: 7, color: GREY, align: 'center' });
 
-  const brandingY = y + logoMaxH + 4;
-  doc.setFont('helvetica', 'bold'); doc.setFontSize(11); doc.setTextColor(...NAVY);
-  doc.text('FAITHWAY OVERSEAS & IMMIGRATION', MARGIN + col1_w/2, brandingY, { align: 'center' });
-  doc.setFont('helvetica', 'normal'); doc.setFontSize(7.5); doc.setTextColor(...GREY);
-  doc.text('Your Trusted Partner For Global Opportunities', MARGIN + col1_w/2, brandingY + 4, { align: 'center' });
-
-  // 2. Middle Contact
-  const midX = MARGIN + col1_w + 5;
+  // Column 2: Contact
+  const midX = MARGIN + col1_w;
   doc.setDrawColor(...BORDER_GRAY); doc.setLineWidth(0.2);
-  doc.line(MARGIN + col1_w, y, MARGIN + col1_w, y + 42); 
+  doc.line(midX - 2, headerStartY, midX - 2, headerStartY + headerH); // Divider
 
-  doc.setFont('helvetica', 'normal'); doc.setFontSize(7.5); doc.setTextColor(...DARK);
-  const addrLines = doc.splitTextToSize(company.address, col2_w - 10);
-  let cy = y + 4;
-  doc.text(addrLines, midX, cy);
-  cy += (addrLines.length * 3.8) + 2;
-
-  const labelW = 12; // Consistent label width for alignment
-  doc.setFont('helvetica', 'bold'); doc.setTextColor(...GREY); doc.text('Phone:', midX, cy);
-  doc.setFont('helvetica', 'normal'); doc.setTextColor(...DARK); doc.text(company.phone, midX + labelW, cy);
+  let cy = headerStartY + 2;
+  const addrHeight = L.drawText(company.address, midX + 4, cy, { fontSize: 7.5, maxWidth: col2_w - 8 });
+  cy += (addrHeight * 3.8) + 3;
+  L.drawText(`Phone: ${company.phone}`, midX + 4, cy, { fontSize: 7.5 });
   cy += 4;
-  doc.setFont('helvetica', 'bold'); doc.setTextColor(...GREY); doc.text('Email:', midX, cy);
-  doc.setFont('helvetica', 'normal'); doc.setTextColor(...DARK); doc.text(company.email, midX + labelW, cy);
+  L.drawText(`Email: ${company.email}`, midX + 4, cy, { fontSize: 7.5 });
   cy += 4;
-  doc.setFont('helvetica', 'bold'); doc.setTextColor(...GREY); doc.text('Web:', midX, cy);
-  doc.setFont('helvetica', 'normal'); doc.setTextColor(...DARK); doc.text(company.website, midX + labelW, cy);
+  L.drawText(`Web: ${company.website}`, midX + 4, cy, { fontSize: 7.5 });
 
-  // 3. Right Meta
-  const rightX = PAGE_W - MARGIN;
-  doc.line(MARGIN + col1_w + col2_w, y, MARGIN + col1_w + col2_w, y + 42); 
+  // Column 3: Meta
+  const rightX = MARGIN + col1_w + col2_w;
+  doc.line(rightX - 2, headerStartY, rightX - 2, headerStartY + headerH); // Divider
 
-  doc.setFont('helvetica', 'bold'); doc.setFontSize(26); doc.setTextColor(...NAVY);
-  doc.text('INVOICE', rightX, y + 8, { align: 'right' });
-  doc.setDrawColor(...GOLD); doc.setLineWidth(0.5); doc.line(rightX - 45, y + 12, rightX, y + 12);
+  const metaCenterX = rightX + (col3_w / 2);
+  L.drawText('INVOICE', metaCenterX, headerStartY + 8, { fontSize: 24, fontStyle: 'bold', color: NAVY, align: 'center' });
+  doc.setDrawColor(...GOLD); doc.setLineWidth(0.5); doc.line(metaCenterX - 20, headerStartY + 11, metaCenterX + 20, headerStartY + 11);
 
-  // Status Badge
+  let metaY = headerStartY + 15;
   if (invoice.payment_type && invoice.payment_type !== 'Full Payment') {
-    doc.setFillColor(...NAVY);
     const badgeText = invoice.payment_type.toUpperCase();
-    doc.setFontSize(7);
     const badgeW = doc.getTextWidth(badgeText) + 6;
-    doc.roundedRect(rightX - badgeW, y + 13.5, badgeW, 5, 1, 1, 'F');
-    doc.setTextColor(...WHITE);
-    doc.text(badgeText, rightX - (badgeW/2), y + 17, { align: 'center' });
+    L.drawPill(metaCenterX - (badgeW/2), metaY, badgeW, 5, badgeText, { fontSize: 6.5 });
+    metaY += 7;
+  } else {
+    metaY += 2;
   }
 
-  doc.setFillColor(...NAVY); doc.roundedRect(rightX - 52, y + 20, 52, 7, 1.5, 1.5, 'F');
-  doc.setFontSize(9); doc.setTextColor(...WHITE);
-  doc.text(`INVOICE NO: ${invoice.invoice_number}`, rightX - 3, y + 24.8, { align: 'right' });
+  const invNoText = `INVOICE NO: ${invoice.invoice_number}`;
+  const invNoW = doc.getTextWidth(invNoText) + 8;
+  L.drawPill(metaCenterX - (invNoW/2), metaY, invNoW, 7, invNoText, { fontSize: 8.5, radius: 1.5 });
+  
+  metaY += 11;
+  L.drawText('INVOICE DATE', metaCenterX, metaY, { fontSize: 8, fontStyle: 'bold', color: GREY, align: 'center' });
+  L.drawText(new Date(invoice.invoice_date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).toUpperCase(), metaCenterX, metaY + 5, { fontSize: 8.5, color: DARK, align: 'center' });
 
-  doc.setFontSize(8.5); doc.setTextColor(...GREY); doc.setFont('helvetica', 'bold');
-  doc.text('INVOICE DATE', rightX, y + 33, { align: 'right' });
-  doc.setFont('helvetica', 'normal'); doc.setTextColor(...DARK);
-  doc.text(new Date(invoice.invoice_date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).toUpperCase(), rightX, y + 38, { align: 'right' });
+  L.setY(headerStartY + headerH + 8);
 
-  y = MARGIN + 50;
+  // ── BILL TO ────────────────────────────────────────────────────────────────
 
-  // ── BILL TO SECTION ──────────────────────────────────────────────────────
-
+  const billToY = L.y;
   const clientNameLines = doc.splitTextToSize(invoice.client_name, 110);
   const clientAddrLines = doc.splitTextToSize(invoice.client_address || '', 110);
-  const billToH = Math.max(38, 16 + (clientNameLines.length * 5) + (clientAddrLines.length * 4.2) + (invoice.client_email ? 6 : 0));
+  const billToContentH = (clientNameLines.length * 5) + (clientAddrLines.length * 4.2) + (invoice.client_email ? 6 : 0);
+  const billToBoxH = Math.max(32, billToContentH + 16);
 
-  doc.setFillColor(...LIGHT_GRAY); doc.rect(MARGIN, y, CONTENT_W, billToH, 'F');
-  doc.setDrawColor(...BORDER_GRAY); doc.setLineWidth(0.2); doc.rect(MARGIN, y, CONTENT_W, billToH, 'S');
-  
-  doc.setFillColor(...NAVY); doc.roundedRect(MARGIN, y - 2, 32, 8, 2, 2, 'F');
-  doc.setFont('helvetica', 'bold'); doc.setFontSize(8.5); doc.setTextColor(...WHITE);
-  doc.text('BILL TO', MARGIN + 16, y + 3.2, { align: 'center' });
+  L.drawBox(MARGIN, billToY, CONTENT_W, billToBoxH, { bgColor: LIGHT_GRAY });
+  L.drawPill(MARGIN, billToY - 2, 30, 8, 'BILL TO', { radius: 2 });
 
-  let by = y + 13;
-  doc.setFont('helvetica', 'bold'); doc.setFontSize(14); doc.setTextColor(...NAVY);
-  doc.text(clientNameLines, MARGIN + 8, by);
-  by += (clientNameLines.length * 5.2);
-  
-  doc.setFont('helvetica', 'normal'); doc.setFontSize(9.5); doc.setTextColor(...DARK);
-  doc.text(clientAddrLines, MARGIN + 8, by);
-  by += (clientAddrLines.length * 4.5);
-  
+  let bty = billToY + 11;
+  L.drawText(clientNameLines, MARGIN + 6, bty, { fontSize: 13, fontStyle: 'bold', color: NAVY });
+  bty += (clientNameLines.length * 5);
+  L.drawText(clientAddrLines, MARGIN + 6, bty, { fontSize: 9, color: GREY });
+  bty += (clientAddrLines.length * 4.2);
   if (invoice.client_email) {
-    doc.setFont('helvetica', 'bold'); doc.setTextColor(...NAVY); doc.text(invoice.client_email, MARGIN + 8, by);
+    L.drawText(invoice.client_email, MARGIN + 6, bty, { fontSize: 9, color: NAVY });
   }
 
-  // Currency Card
-  const cardW = 52; const cardX = PAGE_W - MARGIN - cardW - 6; const cardY = y + 8;
-  doc.setFillColor(255, 255, 255); doc.roundedRect(cardX, cardY, cardW, 22, 1, 1, 'FD');
-  doc.setFillColor(...NAVY); doc.rect(cardX, cardY, 15, 22, 'F'); 
-  doc.setFont('helvetica', 'bold'); doc.setFontSize(7); doc.setTextColor(...WHITE);
-  doc.text('CURR', cardX + 7.5, cardY + 11, { align: 'center', angle: 90 });
-  doc.setTextColor(...NAVY); doc.setFontSize(8); doc.text('CURRENCY INFO', cardX + 18, cardY + 6);
+  // Currency Card (Vertically Centered)
+  const cardW = 52; const cardX = PAGE_W - MARGIN - cardW - 4;
+  const cardH = 22;
+  const cardY = billToY + (billToBoxH - cardH) / 2;
   
-  doc.setFontSize(7.5); doc.setFont('helvetica', 'normal'); doc.setTextColor(...GREY);
-  doc.text(`Currency:`, cardX + 18, cardY + 11);
-  doc.text(`Exchange Rate:`, cardX + 18, cardY + 15);
-  doc.setFont('helvetica', 'bold'); doc.setTextColor(...DARK);
-  doc.text(invoice.currency, cardX + 48, cardY + 11, { align: 'right' });
-  doc.text(`1.00`, cardX + 48, cardY + 15, { align: 'right' });
-  doc.setFontSize(6); doc.setTextColor(...GREY); doc.setFont('helvetica', 'normal');
-  doc.text(`(All amounts in ${invoice.currency})`, cardX + 18, cardY + 19);
+  L.drawBox(cardX, cardY, cardW, cardH, { bgColor: WHITE, radius: 1 });
+  doc.setFillColor(...NAVY); doc.rect(cardX, cardY, 14, cardH, 'F');
+  L.drawText('CURR', cardX + 7, cardY + cardH/2, { fontSize: 7, fontStyle: 'bold', color: WHITE, align: 'center', angle: 90 });
+  
+  L.drawText('CURRENCY INFO', cardX + 18, cardY + 6, { fontSize: 8, fontStyle: 'bold', color: NAVY });
+  L.drawText('Currency:', cardX + 18, cardY + 11, { fontSize: 8, color: DARK });
+  L.drawText(invoice.currency, cardX + 48, cardY + 11, { fontSize: 8, fontStyle: 'bold', color: NAVY, align: 'right' });
+  L.drawText('Exchange Rate:', cardX + 18, cardY + 15, { fontSize: 8, color: DARK });
+  L.drawText('1.00', cardX + 48, cardY + 15, { fontSize: 8, fontStyle: 'bold', color: NAVY, align: 'right' });
+  L.drawText(`(Amounts in ${invoice.currency})`, cardX + 18, cardY + 19, { fontSize: 6.5, color: GREY });
 
-  y += billToH + 12;
+  L.setY(billToY + billToBoxH + 10);
 
-  // ── TABLE ─────────────────────────────────────────────────────────────────
+  // ── SERVICE TABLE ──────────────────────────────────────────────────────────
 
-  const cols = [12, 50, 32, 58, 28];
-  const headers = ['#', 'SERVICE NAME', 'COUNTRY', 'DESCRIPTION', 'AMOUNT'];
-  doc.setFillColor(...NAVY); doc.rect(MARGIN, y, CONTENT_W, 11, 'F');
-  doc.setFont('helvetica', 'bold'); doc.setFontSize(8.5); doc.setTextColor(...WHITE);
+  const tableY = L.y;
+  const tCols = [10, 45, 28, 67, 32];
+  const tHeaders = ['#', 'SERVICE NAME', 'COUNTRY', 'DESCRIPTION', 'AMOUNT'];
+  
+  L.drawBox(MARGIN, tableY, CONTENT_W, 10, { bgColor: NAVY, borderColor: null });
   let tx = MARGIN;
-  headers.forEach((h, i) => {
-    let align: 'left' | 'center' | 'right' = 'left'; let ox = 4;
-    if (i === 2) { align = 'center'; ox = cols[i] / 2; }
-    if (i === 4) { align = 'right'; ox = cols[i] - 4; }
-    doc.text(h, tx + ox, y + 7, { align }); // y + 7 for perfect vertical centering in 11mm bar
-    tx += cols[i];
+  tHeaders.forEach((h, i) => {
+    let align: any = 'left'; let ox = 4;
+    if (i === 2) { align = 'center'; ox = tCols[i]/2; }
+    if (i === 4) { align = 'right'; ox = tCols[i]-4; }
+    L.drawText(h, tx + ox, tableY + 6.5, { fontSize: 8.5, fontStyle: 'bold', color: WHITE, align });
+    tx += tCols[i];
   });
-  y += 11;
+  L.addY(10);
 
-  const serviceNameLines = doc.splitTextToSize(invoice.service_name, cols[1] - 8);
-  const dLines = doc.splitTextToSize(invoice.description || '—', cols[3] - 8);
-  const rowH = Math.max(18, (serviceNameLines.length * 4.8) + 10, (dLines.length * 4.8) + 10);
-  
-  doc.setFillColor(...LIGHT_GRAY); doc.rect(MARGIN, y, CONTENT_W, rowH, 'F');
-  doc.setDrawColor(...BORDER_GRAY); doc.setLineWidth(0.15); doc.rect(MARGIN, y, CONTENT_W, rowH, 'S');
+  const sNameLines = doc.splitTextToSize(invoice.service_name, tCols[1] - 8);
+  const sDescLines = doc.splitTextToSize(invoice.description || '—', tCols[3] - 8);
+  const rowH = Math.max(16, (sNameLines.length * 4.5) + 8, (sDescLines.length * 4.5) + 8);
+
+  L.drawBox(MARGIN, L.y, CONTENT_W, rowH, { bgColor: LIGHT_GRAY });
   let lx = MARGIN;
-  for (let i = 0; i < cols.length - 1; i++) { lx += cols[i]; doc.line(lx, y, lx, y + rowH); }
+  for (let i = 0; i < tCols.length - 1; i++) { 
+    lx += tCols[i]; doc.line(lx, L.y, lx, L.y + rowH); 
+  }
 
-  doc.setFont('helvetica', 'normal'); doc.setFontSize(9); doc.setTextColor(...DARK);
-  doc.text('1', MARGIN + 6, y + 9, { align: 'center' });
-  doc.setFont('helvetica', 'bold'); doc.setTextColor(...NAVY); doc.text(serviceNameLines, MARGIN + cols[0] + 4, y + 9);
-  doc.setFont('helvetica', 'normal'); doc.setTextColor(...DARK); 
-  doc.text(invoice.country || '—', MARGIN + cols[0] + cols[1] + (cols[2] / 2), y + 9, { align: 'center' });
-  doc.setFontSize(8.5); doc.setTextColor(...GREY); doc.text(dLines, MARGIN + cols[0] + cols[1] + cols[2] + 4, y + 9);
-  doc.setFont('helvetica', 'bold'); doc.setFontSize(9.5); doc.setTextColor(...NAVY); 
   const finalAmt = invoice.invoice_charge_amount || invoice.amount;
-  doc.text(currencyFormat(finalAmt, invoice.currency), PAGE_W - MARGIN - 4, y + 9, { align: 'right' });
+  const ry = L.y + 8;
+  L.drawText('1', MARGIN + 5, ry, { fontSize: 9, align: 'center' });
+  L.drawText(sNameLines, MARGIN + tCols[0] + 4, ry, { fontSize: 9, fontStyle: 'bold', color: NAVY });
+  L.drawText(invoice.country || '—', MARGIN + tCols[0] + tCols[1] + (tCols[2]/2), ry, { fontSize: 9, align: 'center' });
+  L.drawText(sDescLines, MARGIN + tCols[0] + tCols[1] + tCols[2] + 4, L.y + 6.5, { fontSize: 8.5, color: GREY });
+  L.drawText(currencyFormat(finalAmt, invoice.currency), PAGE_W - MARGIN - 4, ry, { fontSize: 9.5, fontStyle: 'bold', color: NAVY, align: 'right' });
 
-  y += rowH + 8;
+  L.addY(rowH + 8);
 
-  // ── TOTALS ────────────────────────────────────────────────────────────────
+  // ── TOTALS ─────────────────────────────────────────────────────────────────
 
-  const wordsLines = doc.splitTextToSize(invoice.amount_in_words || 'Zero Only', 110);
-  const wordsH = Math.max(15, 8 + (wordsLines.length * 4.8));
-  
-  doc.setFillColor(...CREAM); doc.rect(MARGIN, y, 115, wordsH, 'F');
-  doc.setDrawColor(...GOLD); doc.setLineWidth(0.3); doc.rect(MARGIN, y, 115, wordsH, 'S');
-  doc.setFont('helvetica', 'bold'); doc.setFontSize(7.5); doc.setTextColor(...NAVY); doc.text('AMOUNT CHARGEABLE (IN WORDS)', MARGIN + 4, y + 5.5);
-  doc.setFontSize(9); doc.setTextColor(...DARK); doc.setFont('helvetica', 'normal');
-  doc.text(wordsLines, MARGIN + 4, y + 10.5);
+  const totalBlockY = L.y;
+  const wordLines = doc.splitTextToSize(invoice.amount_in_words || 'Zero Only', 110);
+  const wordsH = Math.max(14, 6 + (wordLines.length * 4.5));
 
-  const tX = PAGE_W - MARGIN - 60;
-  doc.setDrawColor(...BORDER_GRAY); doc.setLineWidth(0.2); doc.rect(tX, y, 60, 11, 'S');
-  doc.setFont('helvetica', 'bold'); doc.setFontSize(9); doc.setTextColor(...GREY);
-  doc.text('SUBTOTAL', tX + 4, y + 7.2); doc.setTextColor(...DARK); doc.text(currencyFormat(finalAmt, invoice.currency), rightX - 4, y + 7.2, { align: 'right' });
-  
-  const grandY = y + 12;
-  doc.setFillColor(...NAVY); doc.rect(tX, grandY, 60, 11, 'F');
-  doc.setDrawColor(...GOLD); doc.setLineWidth(0.5); doc.line(tX, grandY, tX + 60, grandY);
-  doc.setFont('helvetica', 'bold'); doc.setFontSize(10.5); doc.setTextColor(...WHITE);
-  doc.text('GRAND TOTAL', tX + 4, grandY + 7.2); doc.text(currencyFormat(finalAmt, invoice.currency), rightX - 4, grandY + 7.2, { align: 'right' });
+  L.drawBox(MARGIN, totalBlockY, 115, wordsH, { bgColor: CREAM, borderColor: GOLD, borderWidth: 0.3 });
+  L.drawText('AMOUNT CHARGEABLE (IN WORDS)', MARGIN + 3, totalBlockY + 4.5, { fontSize: 7, fontStyle: 'bold', color: NAVY });
+  L.drawText(wordLines, MARGIN + 3, totalBlockY + 9.5, { fontSize: 9 });
 
-  y = Math.max(y + wordsH + 18, grandY + 22);
+  const summaryX = PAGE_W - MARGIN - 60;
+  L.drawBox(summaryX, totalBlockY, 60, 11, { borderColor: BORDER_GRAY });
+  L.drawText('SUBTOTAL', summaryX + 4, totalBlockY + 7, { fontSize: 9, color: GREY });
+  L.drawText(currencyFormat(finalAmt, invoice.currency), PAGE_W - MARGIN - 4, totalBlockY + 7, { fontSize: 9, align: 'right' });
 
-  // ── BOTTOM ────────────────────────────────────────────────────────────────
+  const grandY = totalBlockY + 11.5;
+  L.drawBox(summaryX, grandY, 60, 10, { bgColor: NAVY, borderColor: GOLD, borderWidth: 0.5 });
+  L.drawText('GRAND TOTAL', summaryX + 4, grandY + 6.5, { fontSize: 10.5, fontStyle: 'bold', color: WHITE });
+  L.drawText(currencyFormat(finalAmt, invoice.currency), PAGE_W - MARGIN - 4, grandY + 6.5, { fontSize: 10.5, fontStyle: 'bold', color: WHITE, align: 'right' });
 
-  let notesHeight = 13;
-  const noteItems: string[][] = [];
+  L.setY(Math.max(totalBlockY + wordsH + 12, grandY + 18));
+
+  // ── NOTES & SIGNATURE ──────────────────────────────────────────────────────
+
+  const bottomY = L.y;
+  let notesLines: string[][] = [];
+  let notesH = 12;
   if (invoice.notes) {
-    invoice.notes.split('\n').filter(n => n.trim()).forEach(note => {
-      const wrapped = doc.splitTextToSize(`• ${note.trim()}`, 90);
-      noteItems.push(wrapped);
-      notesHeight += (wrapped.length * 4);
+    invoice.notes.split('\n').filter(n => n.trim()).forEach(n => {
+      const w = doc.splitTextToSize(`• ${n.trim()}`, 92);
+      notesLines.push(w);
+      notesH += (w.length * 3.8);
     });
   }
-  
-  const remarkTextLines = doc.splitTextToSize(`Being sale made to ${invoice.client_name} for ${invoice.service_name} services.`, 90);
-  const bottomBoxH = Math.max(60, notesHeight + (remarkTextLines.length * 4.5) + 25);
+  const bottomCardH = Math.max(50, notesH + 15);
 
-  doc.setDrawColor(...BORDER_GRAY); doc.rect(MARGIN, y, 100, bottomBoxH, 'S');
-  doc.setFont('helvetica', 'bold'); doc.setFontSize(9); doc.setTextColor(...NAVY); doc.text('NOTES / TERMS', MARGIN + 5, y + 7);
-  doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(...GREY);
-  let ny = y + 13;
-  noteItems.forEach(wrapped => {
-    doc.text(wrapped, MARGIN + 7, ny); ny += (wrapped.length * 4);
+  L.drawBox(MARGIN, bottomY, 105, bottomCardH, { borderColor: BORDER_GRAY, radius: 1 });
+  L.drawText('NOTES / TERMS', MARGIN + 4, bottomY + 6, { fontSize: 8.5, fontStyle: 'bold', color: NAVY });
+  let ny = bottomY + 11;
+  notesLines.forEach(lns => {
+    L.drawText(lns, MARGIN + 6, ny, { fontSize: 7.5, color: GREY });
+    ny += (lns.length * 3.8);
   });
-  
-  const remarksY = Math.max(ny + 6, y + bottomBoxH - 18);
-  doc.setFont('helvetica', 'bold'); doc.setTextColor(...NAVY); doc.text('REMARKS:', MARGIN + 5, remarksY);
-  doc.setFont('helvetica', 'normal'); doc.setTextColor(...DARK);
-  doc.text(remarkTextLines, MARGIN + 5, remarksY + 5);
 
-  doc.setFont('helvetica', 'bold'); doc.setTextColor(...NAVY); doc.text('COMPANY PAN:', MARGIN + 5, y + bottomBoxH - 5);
-  doc.setTextColor(...DARK); doc.text('AAGCK5647J', MARGIN + 32, y + bottomBoxH - 5);
+  const sigW = 72; const sigX = PAGE_W - MARGIN - sigW;
+  L.drawBox(sigX, bottomY, sigW, bottomCardH, { borderColor: NAVY, borderWidth: 0.3, radius: 1 });
+  L.drawText('FOR FAITHWAY OVERSEAS & IMMIGRATION', sigX + sigW/2, bottomY + 7, { fontSize: 8, fontStyle: 'bold', align: 'center' });
+  
+  const sigSpaceH = bottomCardH - 20;
+  if (stamp) L.drawImageContain(stamp, sigX + 4, bottomY + 10, 28, sigSpaceH);
+  if (signature) L.drawImageContain(signature, sigX + 38, bottomY + 10, 30, sigSpaceH);
 
-  const sW = 75; const sX = PAGE_W - MARGIN - sW;
-  doc.setDrawColor(...NAVY); doc.setLineWidth(0.3); doc.rect(sX, y, sW, bottomBoxH, 'S');
-  doc.setFont('helvetica', 'bold'); doc.setFontSize(8.5); doc.text('FOR FAITHWAY OVERSEAS & IMMIGRATION', sX + sW/2, y + 8, { align: 'center' });
-  
-  const signatureSpaceY = y + 14;
-  const signatureSpaceH = bottomBoxH - 26;
-  
-  if (stamp) {
-    const sR = stamp.width / stamp.height; let sw = 30, sh = 30;
-    if (sR > 1) sh = 30/sR; else sw = 30*sR;
-    doc.addImage(stamp.data, 'PNG', sX + 6 + (30-sw)/2, signatureSpaceY + (signatureSpaceH - sh)/2, sw, sh);
-  }
-  if (signature) {
-    const siR = signature.width / signature.height; let siw = 35, sih = 22;
-    if (siR > (35/22)) sih = 35/siR; else siw = 22*siR;
-    doc.addImage(signature.data, 'PNG', sX + 36 + (35-siw)/2, signatureSpaceY + (signatureSpaceH - sih)/2, siw, sih);
-  }
-  
-  doc.setDrawColor(...BORDER_GRAY); doc.line(sX + 12, y + bottomBoxH - 10, sX + sW - 12, y + bottomBoxH - 10);
-  doc.text('Authorised Signatory', sX + sW/2, y + bottomBoxH - 5, { align: 'center' });
+  L.doc.setDrawColor(...NAVY); L.doc.setLineWidth(0.2);
+  L.doc.line(sigX + 10, bottomY + bottomCardH - 8, sigX + sigW - 10, bottomY + bottomCardH - 8);
+  L.drawText('Authorised Signatory', sigX + sigW/2, bottomY + bottomCardH - 4, { fontSize: 8, fontStyle: 'bold', align: 'center' });
 
-  // FOOTER
-  const fY = 274; doc.setFillColor(...NAVY); doc.rect(0, fY, PAGE_W, 23, 'F');
-  doc.setDrawColor(...GOLD); doc.setLineWidth(1.0); doc.line(0, fY, PAGE_W, fY);
-  doc.setFont('helvetica', 'bold'); doc.setFontSize(9.5); doc.setTextColor(...GOLD);
-  const fW = PAGE_W / 3;
-  doc.text('UAE Consultation', fW/2, fY + 7, { align: 'center' });
-  doc.text('India Contact', (fW*1.5), fY + 7, { align: 'center' });
-  doc.text('Global Website', (fW*2.5), fY + 7, { align: 'center' });
-  doc.setTextColor(...WHITE); doc.setFontSize(9);
-  doc.text(company.phone, fW/2, fY + 13, { align: 'center' });
-  doc.text('+91 72075 89444', (fW*1.5), fY + 13, { align: 'center' });
-  doc.text(company.website, (fW*2.5), fY + 13, { align: 'center' });
-  doc.setFontSize(7.5); doc.setTextColor(170, 180, 210);
-  doc.text('This is a System Generated Invoice.', PAGE_W/2, fY + 19, { align: 'center' });
+  L.addY(bottomCardH + 5);
+  L.drawText('REMARKS:', MARGIN, L.y, { fontSize: 8, fontStyle: 'bold', color: NAVY });
+  L.drawText(`Being sale made to ${invoice.client_name} for ${invoice.service_name} services.`, MARGIN + 18, L.y, { fontSize: 8, color: DARK });
+
+  // ── FOOTER ─────────────────────────────────────────────────────────────────
+
+  const fY = 274;
+  L.doc.setFillColor(...NAVY); L.doc.rect(0, fY, PAGE_W, 23, 'F');
+  L.doc.setDrawColor(...GOLD); L.doc.setLineWidth(0.8); L.doc.line(0, fY, PAGE_W, fY);
+  
+  L.doc.setFont('helvetica', 'bold'); L.doc.setFontSize(9); L.doc.setTextColor(...GOLD);
+  const fw = PAGE_W / 3;
+  L.doc.text('UAE Consultation', fw/2, fY + 7, { align: 'center' });
+  L.doc.text('India Contact', (fw * 1.5), fY + 7, { align: 'center' });
+  L.doc.text('Global Website', (fw * 2.5), fY + 7, { align: 'center' });
+  
+  L.doc.setTextColor(...WHITE); L.doc.setFontSize(8.5);
+  L.doc.text(company.phone, fw/2, fY + 12.5, { align: 'center' });
+  L.doc.text('+91 72075 89444', (fw * 1.5), fY + 12.5, { align: 'center' });
+  L.doc.text(company.website, (fw * 2.5), fY + 12.5, { align: 'center' });
+  
+  L.doc.setFontSize(7); L.doc.setTextColor(170, 180, 210);
+  L.doc.text('This is a System Generated Invoice.', PAGE_W/2, fY + 19, { align: 'center' });
 
   return doc.output('blob');
 }
