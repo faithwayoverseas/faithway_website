@@ -128,9 +128,10 @@ export async function generateInvoicePdf(
   if (invoice.payment_type && invoice.payment_type !== 'Full Payment') {
     doc.setFillColor(...NAVY);
     const badgeText = invoice.payment_type.toUpperCase();
+    doc.setFontSize(7); // Set font size BEFORE measuring
     const badgeW = doc.getTextWidth(badgeText) + 6;
     doc.roundedRect(rightX - badgeW, y + 13.5, badgeW, 5, 1, 1, 'F');
-    doc.setFontSize(7); doc.setTextColor(...WHITE);
+    doc.setTextColor(...WHITE);
     doc.text(badgeText, rightX - (badgeW/2), y + 17, { align: 'center' });
   }
 
@@ -152,7 +153,7 @@ export async function generateInvoicePdf(
   const clientAddrLines = doc.splitTextToSize(invoice.client_address || '', 110);
   
   // Height calculation for Bill To box
-  const billToH = Math.max(35, 12 + (clientNameLines.length * 5) + (clientAddrLines.length * 4.2) + (invoice.client_email ? 6 : 0));
+  const billToH = Math.max(35, 14 + (clientNameLines.length * 5) + (clientAddrLines.length * 4.2) + (invoice.client_email ? 6 : 0));
 
   doc.setFillColor(...LIGHT_GRAY); doc.rect(MARGIN, y, CONTENT_W, billToH, 'F');
   doc.setDrawColor(...BORDER_GRAY); doc.setLineWidth(0.2); doc.rect(MARGIN, y, CONTENT_W, billToH, 'S');
@@ -161,7 +162,7 @@ export async function generateInvoicePdf(
   doc.setFont('helvetica', 'bold'); doc.setFontSize(8.5); doc.setTextColor(...WHITE);
   doc.text('BILL TO', MARGIN + 6, y + 3.5);
 
-  let by = y + 10;
+  let by = y + 12;
   doc.setFont('helvetica', 'bold'); doc.setFontSize(13); doc.setTextColor(...NAVY);
   doc.text(clientNameLines, MARGIN + 6, by);
   by += (clientNameLines.length * 5);
