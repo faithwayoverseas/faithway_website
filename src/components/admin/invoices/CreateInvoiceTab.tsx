@@ -2,36 +2,41 @@
 
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { FileText, Download, CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
+import { FileText, Download, CheckCircle2, AlertCircle, Loader2, Calculator } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { InvoiceSettings, InvoiceCurrency } from "@/lib/types";
 import { amountInWords } from "@/lib/invoiceHelpers";
 import { generateInvoicePdf } from "@/lib/generateInvoicePdf";
 
 const CURRENCIES: InvoiceCurrency[] = ["INR", "AED", "USD"];
+const PAYMENT_TYPES = ["Full Payment", "Advance Payment", "Partial Payment", "Final Settlement"];
 
 interface FormState {
-  client_name:    string;
-  client_address: string;
-  client_email:   string;
-  service_name:   string;
-  country:        string;
-  description:    string;
-  currency:       InvoiceCurrency;
-  amount:         string;
-  notes:          string;
+  client_name:           string;
+  client_address:        string;
+  client_email:          string;
+  service_name:          string;
+  country:               string;
+  description:           string;
+  currency:              InvoiceCurrency;
+  payment_type:          string;
+  service_total_amount:  string;
+  advance_received:      string;
+  invoice_charge_amount: string;
+  notes:                 string;
 }
 
 const EMPTY: FormState = {
   client_name: "", client_address: "", client_email: "",
   service_name: "", country: "", description: "",
-  currency: "INR", amount: "", notes: "",
+  currency: "INR", payment_type: "Full Payment",
+  service_total_amount: "", advance_received: "0", invoice_charge_amount: "",
+  notes: "",
 };
 
 const inputCls = "w-full bg-white/[0.03] border border-white/10 rounded-xl px-4 py-3 text-white focus:border-royal outline-none transition-all placeholder:text-white/10 text-sm";
 const labelCls = "text-[10px] uppercase tracking-widest font-bold text-white/40";
 
-// Progress steps displayed while generating
 type Step = "idle" | "numbering" | "pdf" | "uploading" | "saving" | "done";
 
 const STEP_LABELS: Record<Step, string> = {
@@ -54,7 +59,12 @@ export function CreateInvoiceTab({ onInvoiceCreated }: { onInvoiceCreated?: () =
 
   const generating = step !== "idle" && step !== "done";
 
-  // Load invoice settings (for logo/company details in PDF)
+  // Auto-calculate pending due
+  const totalAmt   = parseFloat(form.service_total_amount) || 0;
+  const advance    = parseFloat(form.advance_received) || 0;
+  const charge     = parseFloat(form.invoice_charge_amount) || 0;
+  const pendingDue = totalAmt - advance - charge;
+
   useEffect(() => {
     let alive = true;
     (async () => {
@@ -65,7 +75,6 @@ export function CreateInvoiceTab({ onInvoiceCreated }: { onInvoiceCreated?: () =
         .maybeSingle();
       if (alive && data) {
         setSettings(data as InvoiceSettings);
-        // Pre-fill notes if current form notes are empty
         setForm(prev => ({
           ...prev,
           notes: prev.notes || (data.notes_terms || "")
@@ -73,7 +82,6 @@ export function CreateInvoiceTab({ onInvoiceCreated }: { onInvoiceCreated?: () =
       }
     })();
     return () => { alive = false; };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   function set(k: keyof FormState) {
@@ -81,95 +89,64 @@ export function CreateInvoiceTab({ onInvoiceCreated }: { onInvoiceCreated?: () =
       setForm(p => ({ ...p, [k]: e.target.value }));
   }
 
-  // ── Main generation handler ─────────────────────────────────────────────────
   async function handleGenerate() {
-    // Validate required fields
     if (!form.client_name.trim()) { setError("Client Name is required."); return; }
     if (!form.service_name.trim()) { setError("Service Name is required."); return; }
-    if (!form.amount.trim()) { setError("Amount is required."); return; }
-    const amtNum = parseFloat(form.amount);
-    if (isNaN(amtNum) || amtNum <= 0) { setError("Please enter a valid positive amount."); return; }
+    if (!form.invoice_charge_amount.trim()) { setError("Charge Amount is required."); return; }
+    
+    if (isNaN(charge) || charge <= 0) { setError("Please enter a valid positive charge amount."); return; }
 
     setError(null);
     setSuccess(null);
 
     try {
-      // ── Step 1: Get invoice number via Supabase RPC (transaction-safe) ────
       setStep("numbering");
       const { data: invNumber, error: rpcErr } = await supabase.rpc("generate_invoice_number");
-
-      if (rpcErr) {
-        throw new Error(
-          `Invoice number generation failed: ${rpcErr.message}` +
-          (rpcErr.code ? ` [code: ${rpcErr.code}]` : "") +
-          (rpcErr.hint ? ` Hint: ${rpcErr.hint}` : "")
-        );
-      }
-      if (!invNumber || typeof invNumber !== "string") {
-        throw new Error("RPC returned an empty invoice number. Check that generate_invoice_number() is deployed and the anon role has EXECUTE permission.");
-      }
+      if (rpcErr) throw new Error(`Invoice number generation failed: ${rpcErr.message}`);
+      if (!invNumber) throw new Error("Could not get invoice number.");
 
       const today = new Date().toISOString().split("T")[0];
-      const words = amountInWords(amtNum, form.currency);
+      const words = amountInWords(charge, form.currency);
 
       const invoicePayload = {
-        invoice_number:  invNumber,
-        invoice_date:    today,
-        client_name:     form.client_name.trim(),
-        client_address:  form.client_address.trim()  || null,
-        client_email:    form.client_email.trim()    || null,
-        service_name:    form.service_name.trim(),
-        country:         form.country.trim()         || null,
-        description:     form.description.trim()     || null,
-        currency:        form.currency,
-        amount:          amtNum,
-        amount_in_words: words,
-        notes:           form.notes.trim()           || null,
-        pdf_url:         null as string | null,
+        invoice_number:         invNumber,
+        invoice_date:           today,
+        client_name:            form.client_name.trim(),
+        client_address:         form.client_address.trim()  || null,
+        client_email:           form.client_email.trim()    || null,
+        service_name:           form.service_name.trim(),
+        country:                form.country.trim()         || null,
+        description:            form.description.trim()     || null,
+        currency:               form.currency,
+        amount:                 charge, // Still save as 'amount' for backward compatibility in history list if needed
+        amount_in_words:        words,
+        notes:                  form.notes.trim()           || null,
+        payment_type:           form.payment_type,
+        service_total_amount:   totalAmt,
+        advance_received:       advance,
+        invoice_charge_amount:  charge,
+        pending_due:            pendingDue,
+        pdf_url:                null as string | null,
       };
 
-      // ── Step 2: Generate PDF client-side ──────────────────────────────────
       setStep("pdf");
       const pdfBlob = await generateInvoicePdf(invoicePayload, settings);
 
-      // ── Step 3: Upload PDF to Supabase Storage ────────────────────────────
       setStep("uploading");
-      // Use timestamp in filename to avoid collisions
       const timestamp = Date.now();
       const fileName  = `${invNumber}_${timestamp}.pdf`;
-
       const { error: uploadErr } = await supabase.storage
         .from("invoices")
         .upload(fileName, pdfBlob, { contentType: "application/pdf", upsert: false });
+      if (uploadErr) throw new Error(`PDF upload failed: ${uploadErr.message}`);
 
-      if (uploadErr) {
-        throw new Error(
-          `PDF upload failed: ${uploadErr.message}` +
-          (uploadErr.statusCode ? ` [HTTP ${uploadErr.statusCode}]` : "")
-        );
-      }
-
-      const { data: urlData } = supabase.storage
-        .from("invoices")
-        .getPublicUrl(fileName);
-
+      const { data: urlData } = supabase.storage.from("invoices").getPublicUrl(fileName);
       invoicePayload.pdf_url = urlData.publicUrl;
 
-      // ── Step 4: Insert invoice record ─────────────────────────────────────
       setStep("saving");
-      const { error: insErr } = await supabase
-        .from("invoices")
-        .insert([invoicePayload]);
+      const { error: insErr } = await supabase.from("invoices").insert([invoicePayload]);
+      if (insErr) throw new Error(`Database save failed: ${insErr.message}`);
 
-      if (insErr) {
-        throw new Error(
-          `Database save failed: ${insErr.message}` +
-          (insErr.code    ? ` [code: ${insErr.code}]`    : "") +
-          (insErr.details ? ` Details: ${insErr.details}` : "")
-        );
-      }
-
-      // ── Step 5: Trigger browser download ──────────────────────────────────
       const blobUrl = URL.createObjectURL(pdfBlob);
       const a = document.createElement("a");
       a.href = blobUrl;
@@ -190,39 +167,29 @@ export function CreateInvoiceTab({ onInvoiceCreated }: { onInvoiceCreated?: () =
     }
   }
 
-  const amtNum = parseFloat(form.amount);
-  const showWords = form.amount !== "" && !isNaN(amtNum) && amtNum > 0;
+  const showWords = charge > 0;
 
   return (
-    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-8 max-w-4xl">
-
-      {/* Success Banner */}
+    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-8 max-w-4xl pb-20">
       <AnimatePresence>
         {success && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
-            className="flex items-center justify-between p-5 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl"
-          >
+          <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
+            className="flex items-center justify-between p-5 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl">
             <div className="flex items-center gap-3 text-emerald-400">
               <CheckCircle2 size={20} />
               <div>
-                <p className="font-bold text-sm">Invoice {success.number} generated &amp; saved!</p>
-                <p className="text-xs text-emerald-400/60">PDF downloaded. Re-download anytime from Invoice History.</p>
+                <p className="font-bold text-sm">Invoice {success.number} generated!</p>
+                <p className="text-xs text-emerald-400/60">Accounting data synced to Supabase.</p>
               </div>
             </div>
-            <a
-              href={success.downloadUrl}
-              target="_blank"
-              rel="noreferrer"
-              className="flex items-center gap-2 px-4 py-2 bg-emerald-500/20 hover:bg-emerald-500/30 rounded-lg text-emerald-400 text-xs font-bold uppercase tracking-widest transition-all"
-            >
-              <Download size={14} /> Download Again
+            <a href={success.downloadUrl} target="_blank" rel="noreferrer"
+              className="flex items-center gap-2 px-4 py-2 bg-emerald-500/20 hover:bg-emerald-500/30 rounded-lg text-emerald-400 text-xs font-bold uppercase tracking-widest transition-all">
+              <Download size={14} /> Download PDF
             </a>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Error Banner */}
       {error && (
         <div className="flex items-start gap-3 p-4 bg-rose-500/10 border border-rose-500/20 rounded-xl text-rose-400 text-sm">
           <AlertCircle size={16} className="mt-0.5 shrink-0" />
@@ -230,101 +197,105 @@ export function CreateInvoiceTab({ onInvoiceCreated }: { onInvoiceCreated?: () =
         </div>
       )}
 
-      {/* Form Card */}
       <div className="glass-premium p-8 rounded-3xl border border-white/5">
-        <h3 className="text-lg font-bold mb-8 flex items-center gap-3">
-          <FileText size={18} className="text-gold" /> Invoice Details
+        <h3 className="text-lg font-bold mb-8 flex items-center gap-3 text-white">
+          <FileText size={18} className="text-gold" /> Create New Invoice
         </h3>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-
-          {/* Client */}
-          <div className="space-y-2">
-            <label className={labelCls}>Client Name <span className="text-rose-400">*</span></label>
-            <input value={form.client_name} onChange={set("client_name")} className={inputCls} placeholder="Full name or company" />
-          </div>
-          <div className="space-y-2">
-            <label className={labelCls}>Client Email</label>
-            <input value={form.client_email} onChange={set("client_email")} type="email" className={inputCls} placeholder="client@example.com" />
-          </div>
-          <div className="space-y-2 md:col-span-2">
-            <label className={labelCls}>Client Address</label>
-            <input value={form.client_address} onChange={set("client_address")} className={inputCls} placeholder="Full billing address" />
-          </div>
-
-          {/* Service */}
-          <div className="space-y-2">
-            <label className={labelCls}>Service Name <span className="text-rose-400">*</span></label>
-            <input value={form.service_name} onChange={set("service_name")} className={inputCls} placeholder="e.g. Tourist Visa Processing" />
-          </div>
-          <div className="space-y-2">
-            <label className={labelCls}>Country</label>
-            <input value={form.country} onChange={set("country")} className={inputCls} placeholder="e.g. United Arab Emirates" />
-          </div>
-          <div className="space-y-2 md:col-span-2">
-            <label className={labelCls}>Description</label>
-            <textarea
-              value={form.description} onChange={set("description")} rows={3}
-              className={inputCls + " resize-none"}
-              placeholder="Service description / scope of work"
-            />
-          </div>
-
-          {/* Amount */}
-          <div className="space-y-2">
-            <label className={labelCls}>Currency <span className="text-rose-400">*</span></label>
-            <select value={form.currency} onChange={set("currency")} className={inputCls + " cursor-pointer"}>
-              {CURRENCIES.map(c => <option key={c} value={c}>{c}</option>)}
-            </select>
-          </div>
-          <div className="space-y-2">
-            <label className={labelCls}>Amount <span className="text-rose-400">*</span></label>
-            <input
-              value={form.amount} onChange={set("amount")} type="number" min="0" step="0.01"
-              className={inputCls} placeholder="0.00"
-            />
-          </div>
-          {showWords && (
-            <div className="md:col-span-2 px-1">
-              <p className="text-xs text-white/30 italic">
-                In Words: <span className="text-white/50">{amountInWords(amtNum, form.currency)}</span>
-              </p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="space-y-6">
+            <div className="space-y-2">
+              <label className={labelCls}>Client Name <span className="text-rose-400">*</span></label>
+              <input value={form.client_name} onChange={set("client_name")} className={inputCls} placeholder="Full name" />
             </div>
-          )}
+            <div className="space-y-2">
+              <label className={labelCls}>Client Address</label>
+              <textarea value={form.client_address} onChange={set("client_address")} rows={2} className={inputCls + " resize-none"} placeholder="Billing address" />
+            </div>
+            <div className="space-y-2">
+              <label className={labelCls}>Client Email</label>
+              <input value={form.client_email} onChange={set("client_email")} type="email" className={inputCls} placeholder="client@example.com" />
+            </div>
+          </div>
 
-          {/* Notes */}
-          <div className="space-y-2 md:col-span-2">
-            <label className={labelCls}>Notes / Terms</label>
-            <textarea
-              value={form.notes} onChange={set("notes")} rows={3}
-              className={inputCls + " resize-none"}
-              placeholder="Payment terms, conditions, or additional notes…"
-            />
+          <div className="space-y-6">
+            <div className="space-y-2">
+              <label className={labelCls}>Service Name <span className="text-rose-400">*</span></label>
+              <input value={form.service_name} onChange={set("service_name")} className={inputCls} placeholder="e.g. Visa Consultancy" />
+            </div>
+            <div className="space-y-2">
+              <label className={labelCls}>Country</label>
+              <input value={form.country} onChange={set("country")} className={inputCls} placeholder="Destination country" />
+            </div>
+            <div className="space-y-2">
+              <label className={labelCls}>Service Description</label>
+              <textarea value={form.description} onChange={set("description")} rows={2} className={inputCls + " resize-none"} placeholder="Scope of service" />
+            </div>
+          </div>
+
+          {/* INTERNAL ACCOUNTING SECTION */}
+          <div className="md:col-span-2 p-6 bg-white/[0.02] border border-white/5 rounded-2xl space-y-6">
+            <h4 className="text-xs font-bold text-royal uppercase tracking-widest flex items-center gap-2">
+              <Calculator size={14} /> Internal Accounting Control
+            </h4>
+            
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+              <div className="space-y-2">
+                <label className={labelCls}>Payment Type</label>
+                <select value={form.payment_type} onChange={set("payment_type")} className={inputCls + " cursor-pointer"}>
+                  {PAYMENT_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
+                </select>
+              </div>
+              <div className="space-y-2">
+                <label className={labelCls}>Currency</label>
+                <select value={form.currency} onChange={set("currency")} className={inputCls + " cursor-pointer"}>
+                  {CURRENCIES.map(c => <option key={c} value={c}>{c}</option>)}
+                </select>
+              </div>
+              <div className="space-y-2">
+                <label className={labelCls}>Total Package Value</label>
+                <input value={form.service_total_amount} onChange={set("service_total_amount")} type="number" className={inputCls} placeholder="0.00" />
+              </div>
+              <div className="space-y-2">
+                <label className={labelCls}>Advance Received</label>
+                <input value={form.advance_received} onChange={set("advance_received")} type="number" className={inputCls} placeholder="0.00" />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-4 border-t border-white/5">
+              <div className="space-y-2">
+                <label className={labelCls}>Invoice Charge Amount (PDF) <span className="text-rose-400">*</span></label>
+                <input value={form.invoice_charge_amount} onChange={set("invoice_charge_amount")} type="number" className={inputCls + " border-royal/30 text-lg font-bold"} placeholder="0.00" />
+              </div>
+              <div className="flex flex-col justify-end">
+                <div className="p-4 bg-midnight rounded-xl border border-white/5 flex justify-between items-center">
+                  <span className={labelCls}>Final Pending Due:</span>
+                  <span className={`text-lg font-bold ${pendingDue > 0 ? "text-rose-400" : "text-emerald-400"}`}>
+                    {form.currency} {pendingDue.toLocaleString()}
+                  </span>
+                </div>
+              </div>
+            </div>
+            {showWords && (
+              <p className="text-[10px] text-white/30 italic">PDF Amount in Words: {amountInWords(charge, form.currency)}</p>
+            )}
+          </div>
+
+          <div className="md:col-span-2 space-y-2">
+            <label className={labelCls}>Public Notes / Terms (Shown on PDF)</label>
+            <textarea value={form.notes} onChange={set("notes")} rows={4} className={inputCls + " resize-none h-32"} placeholder="Payment instructions..." />
           </div>
         </div>
 
-        {/* Progress indicator */}
-        {generating && (
-          <div className="mt-6 flex items-center gap-3 text-blue-400 text-sm">
-            <Loader2 size={16} className="animate-spin" />
-            <span>{STEP_LABELS[step]}</span>
-          </div>
-        )}
-
-        {/* Generate Button */}
-        <div className="mt-8 flex items-center gap-6">
-          <button
-            onClick={handleGenerate}
-            disabled={generating}
-            className="flex items-center gap-3 px-8 py-4 bg-royal hover:bg-royal/80 rounded-xl text-white font-bold text-sm uppercase tracking-widest transition-all disabled:opacity-60"
-          >
-            {generating
-              ? <Loader2 size={18} className="animate-spin" />
-              : <FileText size={18} />
-            }
-            {generating ? STEP_LABELS[step] : "Generate Invoice"}
+        <div className="mt-10 flex items-center gap-6">
+          <button onClick={handleGenerate} disabled={generating}
+            className="flex items-center gap-3 px-10 py-5 bg-royal hover:bg-royal/80 rounded-2xl text-white font-bold text-sm uppercase tracking-widest transition-all shadow-xl shadow-royal/20 disabled:opacity-50">
+            {generating ? <Loader2 size={18} className="animate-spin" /> : <FileText size={18} />}
+            {generating ? STEP_LABELS[step] : "Generate & Save Invoice"}
           </button>
-          <p className="text-white/20 text-xs">Invoice number is auto-assigned by Supabase.</p>
+          <div className="hidden md:block text-white/20 text-[10px] max-w-xs uppercase tracking-tighter">
+            Invoice engine will auto-wrap text, calculate accounting math, and sync with your records.
+          </div>
         </div>
       </div>
     </motion.div>

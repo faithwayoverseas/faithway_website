@@ -91,6 +91,11 @@ export interface Invoice {
   amount_in_words: string | null;
   notes: string | null;
   pdf_url: string | null;
+  payment_type: string | null;
+  service_total_amount: number;
+  advance_received: number;
+  invoice_charge_amount: number;
+  pending_due: number;
   created_at: string;
   updated_at: string;
 }
