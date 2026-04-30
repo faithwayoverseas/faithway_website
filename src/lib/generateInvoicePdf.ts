@@ -352,15 +352,33 @@ export async function generateInvoicePdf(
 
   const sW = 65, sX = PAGE_W - MARGIN - sW;
   L.drawBox(sX, L.y, sW, bBoxH, { borderColor: NAVY, borderWidth: 0.3 });
-  doc.setFont('helvetica', 'bold'); doc.setFontSize(7.5);
-  doc.text('FOR FAITHWAY OVERSEAS', sX + sW/2, L.y + 7, { align: 'center' });
   
-  const sSpH = bBoxH - 18;
-  // Seal on left, Signature on right overlapping
-  if (stamp) L.fitImage(stamp, sX + 5, L.y + 10, 32, sSpH);
-  if (signature) L.fitImage(signature, sX + 22, L.y + 10, 42, sSpH);
+  // Title
+  doc.setFont('helvetica', 'bold'); doc.setFontSize(9); doc.setTextColor(...NAVY);
+  doc.text('FOR FAITHWAY OVERSEAS', sX + sW/2, L.y + 8, { align: 'center' });
+  
+  const authContentH = bBoxH - 20;
 
-  doc.text('Authorised Signatory', sX + sW/2, L.y + bBoxH - 4, { align: 'center' });
+  // Professional Seal + Signature Layout (Hardcoded Overlap)
+  // Seal: 24mm wide, positioned left-center
+  if (stamp) {
+    const sealRatio = stamp.width / stamp.height;
+    const sealW = 24;
+    const sealH = sealW / sealRatio;
+    doc.addImage(stamp.data, 'PNG', sX + 11, L.y + 13, sealW, sealH);
+  }
+
+  // Signature: 34mm wide, overlapping seal by ~18%
+  if (signature) {
+    const sigRatio = signature.width / signature.height;
+    const sigW = 34;
+    const sigH = sigW / sigRatio;
+    doc.addImage(signature.data, 'PNG', sX + 28, L.y + 15, sigW, sigH);
+  }
+
+  // Label
+  doc.setFont('helvetica', 'bold'); doc.setFontSize(9); doc.setTextColor(...NAVY);
+  doc.text('Authorised Signatory', sX + sW/2, L.y + bBoxH - 7, { align: 'center' });
 
   L.y += bBoxH + 4;
   doc.setFontSize(8); doc.setFont('helvetica', 'bold'); doc.setTextColor(...NAVY);
