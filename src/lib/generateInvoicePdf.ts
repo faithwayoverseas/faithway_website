@@ -355,12 +355,11 @@ export async function generateInvoicePdf(
   doc.setFont('helvetica', 'bold'); doc.setFontSize(7.5);
   doc.text('FOR FAITHWAY OVERSEAS', sX + sW/2, L.y + 7, { align: 'center' });
   
-  const sSpH = bBoxH - 22;
-  if (stamp) L.fitImage(stamp, sX + 4, L.y + 10, 26, sSpH);
-  if (signature) L.fitImage(signature, sX + 34, L.y + 10, 27, sSpH);
+  const sSpH = bBoxH - 18;
+  // Seal on left, Signature on right overlapping
+  if (stamp) L.fitImage(stamp, sX + 5, L.y + 10, 32, sSpH);
+  if (signature) L.fitImage(signature, sX + 22, L.y + 10, 42, sSpH);
 
-  doc.setDrawColor(...NAVY); doc.setLineWidth(0.2);
-  doc.line(sX + 8, L.y + bBoxH - 8, sX + sW - 8, L.y + bBoxH - 8);
   doc.text('Authorised Signatory', sX + sW/2, L.y + bBoxH - 4, { align: 'center' });
 
   L.y += bBoxH + 4;
