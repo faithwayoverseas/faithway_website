@@ -15,6 +15,10 @@ const DEFAULT_FORM = {
   logo_url:        null as string | null,
   signature_url:   null as string | null,
   stamp_url:       null as string | null,
+  notes_terms:     `All fees are non-refundable once the process has been initiated.
+The applicant must provide all documents as per the checklist.
+FaithWay Overseas is not responsible for delays caused by embassy/consulate decisions.
+This invoice is valid for 7 days from the date of issue.`,
 };
 
 type SettingsForm = typeof DEFAULT_FORM;
@@ -40,7 +44,6 @@ export function InvoiceSettingsTab({ onSettingsChanged }: { onSettingsChanged?: 
     setLoading(true);
     setError(null);
     try {
-      // Use maybeSingle so we get null (not an error) when no row exists yet
       const { data, error: fetchErr } = await supabase
         .from("invoice_settings")
         .select("*")
@@ -60,9 +63,9 @@ export function InvoiceSettingsTab({ onSettingsChanged }: { onSettingsChanged?: 
           logo_url:        data.logo_url        ?? null,
           signature_url:   data.signature_url   ?? null,
           stamp_url:       data.stamp_url       ?? null,
+          notes_terms:     data.notes_terms     || DEFAULT_FORM.notes_terms,
         });
       } else {
-        // No row yet — auto-create with defaults so future saves work
         await ensureSettingsRow();
       }
     } catch (e) {
@@ -72,7 +75,6 @@ export function InvoiceSettingsTab({ onSettingsChanged }: { onSettingsChanged?: 
     }
   }
 
-  // Auto-create the default settings row if it doesn't exist yet
   async function ensureSettingsRow() {
     const { data: inserted, error: insErr } = await supabase
       .from("invoice_settings")
@@ -85,7 +87,6 @@ export function InvoiceSettingsTab({ onSettingsChanged }: { onSettingsChanged?: 
       .single();
 
     if (insErr) {
-      // If insert fails (e.g. race condition — row now exists), just re-fetch
       const { data: existing } = await supabase
         .from("invoice_settings")
         .select("*")
@@ -104,7 +105,6 @@ export function InvoiceSettingsTab({ onSettingsChanged }: { onSettingsChanged?: 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // ── Save handler: always UPDATE by id, never blind UPDATE ─────────────────
   async function handleSave() {
     setSaving(true);
     setError(null);
@@ -117,15 +117,12 @@ export function InvoiceSettingsTab({ onSettingsChanged }: { onSettingsChanged?: 
       };
 
       if (rowId) {
-        // Row exists — safe targeted UPDATE with WHERE id = rowId
         const { error: upErr } = await supabase
           .from("invoice_settings")
           .update(payload)
           .eq("id", rowId);
-
-        if (upErr) throw new Error("Save failed: " + upErr.message + " [code: " + upErr.code + "]");
+        if (upErr) throw new Error("Save failed: " + upErr.message);
       } else {
-        // No row id yet — INSERT then capture the new id
         const { data: inserted, error: insErr } = await supabase
           .from("invoice_settings")
           .insert([{
@@ -135,15 +132,13 @@ export function InvoiceSettingsTab({ onSettingsChanged }: { onSettingsChanged?: 
           }])
           .select()
           .single();
-
-        if (insErr) throw new Error("Insert failed: " + insErr.message + " [code: " + insErr.code + "]");
+        if (insErr) throw new Error("Insert failed: " + insErr.message);
         if (inserted) setRowId(inserted.id);
       }
 
       setSaved(true);
       setTimeout(() => setSaved(false), 4000);
       onSettingsChanged?.();
-      // Re-fetch to confirm saved state
       await fetchSettings();
     } catch (e) {
       setError(e instanceof Error ? e.message : "An unexpected error occurred while saving.");
@@ -152,7 +147,6 @@ export function InvoiceSettingsTab({ onSettingsChanged }: { onSettingsChanged?: 
     }
   }
 
-  // ── Asset upload: timestamped filename → no collision ─────────────────────
   async function handleAssetUpload(e: React.ChangeEvent<HTMLInputElement>, field: AssetKey) {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -162,9 +156,9 @@ export function InvoiceSettingsTab({ onSettingsChanged }: { onSettingsChanged?: 
 
     try {
       const ext       = file.name.split(".").pop() || "png";
-      const slug      = field.replace("_url", ""); // e.g. "logo"
+      const slug      = field.replace("_url", "");
       const timestamp = Date.now();
-      const fileName  = `${slug}_${timestamp}.${ext}`; // e.g. "logo_1714500000000.png"
+      const fileName  = `${slug}_${timestamp}.${ext}`;
 
       const { error: upErr } = await supabase.storage
         .from("invoice-assets")
@@ -176,10 +170,8 @@ export function InvoiceSettingsTab({ onSettingsChanged }: { onSettingsChanged?: 
         .from("invoice-assets")
         .getPublicUrl(fileName);
 
-      // Update local form state immediately (user sees the new image)
       setForm(p => ({ ...p, [field]: urlData.publicUrl }));
 
-      // Persist the new URL to the DB row right away (if row exists)
       if (rowId) {
         const { error: dbErr } = await supabase
           .from("invoice_settings")
@@ -191,7 +183,6 @@ export function InvoiceSettingsTab({ onSettingsChanged }: { onSettingsChanged?: 
       setError(e instanceof Error ? e.message : "Upload failed unexpectedly.");
     } finally {
       setUploading(null);
-      // Reset file input so same file can be re-uploaded
       if (field === "logo_url")      logoRef.current && (logoRef.current.value = "");
       if (field === "signature_url") sigRef.current  && (sigRef.current.value  = "");
       if (field === "stamp_url")     stmpRef.current && (stmpRef.current.value = "");
@@ -206,7 +197,6 @@ export function InvoiceSettingsTab({ onSettingsChanged }: { onSettingsChanged?: 
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-8 max-w-3xl">
 
-      {/* Error Banner */}
       {error && (
         <div className="flex items-start gap-3 p-4 bg-rose-500/10 border border-rose-500/20 rounded-xl text-rose-400 text-sm">
           <AlertCircle size={16} className="mt-0.5 shrink-0" />
@@ -214,7 +204,6 @@ export function InvoiceSettingsTab({ onSettingsChanged }: { onSettingsChanged?: 
         </div>
       )}
 
-      {/* Company Details Card */}
       <div className="glass-premium p-8 rounded-3xl border border-white/5">
         <h3 className="text-lg font-bold mb-6 flex items-center gap-3">
           <FileText size={18} className="text-gold" /> Company Details
@@ -248,7 +237,21 @@ export function InvoiceSettingsTab({ onSettingsChanged }: { onSettingsChanged?: 
         </div>
       </div>
 
-      {/* Brand Assets Card */}
+      <div className="glass-premium p-8 rounded-3xl border border-white/5">
+        <h3 className="text-lg font-bold mb-6 flex items-center gap-3">
+          <FileText size={18} className="text-gold" /> Default Invoice Terms
+        </h3>
+        <div className="space-y-2">
+          <label className={labelCls}>Notes / Terms (One per line)</label>
+          <textarea
+            value={form.notes_terms || ""}
+            onChange={e => setForm(p => ({ ...p, notes_terms: e.target.value }))}
+            className={inputCls + " h-32 resize-none"}
+            placeholder="Enter default terms here..."
+          />
+        </div>
+      </div>
+
       <div className="glass-premium p-8 rounded-3xl border border-white/5">
         <h3 className="text-lg font-bold mb-6 flex items-center gap-3">
           <Upload size={18} className="text-gold" /> Brand Assets
@@ -263,28 +266,15 @@ export function InvoiceSettingsTab({ onSettingsChanged }: { onSettingsChanged?: 
               <label className={labelCls}>{label}</label>
               {form[key] ? (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={form[key]!}
-                  alt={label}
-                  className="h-16 w-full object-contain bg-white/5 rounded-xl p-2"
-                />
+                <img src={form[key]!} alt={label} className="h-16 w-full object-contain bg-white/5 rounded-xl p-2" />
               ) : (
                 <div className="h-16 w-full bg-white/[0.03] border border-dashed border-white/20 rounded-xl flex items-center justify-center text-white/20 text-xs">
                   No file uploaded
                 </div>
               )}
-              <input
-                ref={ref}
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={e => handleAssetUpload(e, key)}
-              />
-              <button
-                onClick={() => ref.current?.click()}
-                disabled={uploading === key}
-                className="w-full py-2 text-xs font-bold uppercase tracking-widest bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-white/60 hover:text-white transition-all disabled:opacity-50"
-              >
+              <input ref={ref} type="file" accept="image/*" className="hidden" onChange={e => handleAssetUpload(e, key)} />
+              <button onClick={() => ref.current?.click()} disabled={uploading === key}
+                className="w-full py-2 text-xs font-bold uppercase tracking-widest bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-white/60 hover:text-white transition-all disabled:opacity-50">
                 {uploading === key ? "Uploading…" : "Upload"}
               </button>
             </div>
@@ -292,21 +282,12 @@ export function InvoiceSettingsTab({ onSettingsChanged }: { onSettingsChanged?: 
         </div>
       </div>
 
-      {/* Save Row */}
       <div className="flex items-center gap-6">
-        <button
-          onClick={handleSave}
-          disabled={saving}
-          className="flex items-center gap-2 px-8 py-4 bg-gold hover:bg-gold/80 rounded-xl text-midnight font-bold text-sm uppercase tracking-widest transition-all disabled:opacity-50"
-        >
+        <button onClick={handleSave} disabled={saving}
+          className="flex items-center gap-2 px-8 py-4 bg-gold hover:bg-gold/80 rounded-xl text-midnight font-bold text-sm uppercase tracking-widest transition-all disabled:opacity-50">
           <Save size={18} /> {saving ? "Saving…" : "Save Settings"}
         </button>
-        {saved && (
-          <p className="text-emerald-400 text-sm font-bold">✓ Saved successfully</p>
-        )}
-        {rowId && (
-          <p className="text-white/20 text-xs ml-auto">Row ID: {rowId.slice(0, 8)}…</p>
-        )}
+        {saved && <p className="text-emerald-400 text-sm font-bold">✓ Saved successfully</p>}
       </div>
     </motion.div>
   );

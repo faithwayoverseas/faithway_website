@@ -63,7 +63,14 @@ export function CreateInvoiceTab({ onInvoiceCreated }: { onInvoiceCreated?: () =
         .select("*")
         .limit(1)
         .maybeSingle();
-      if (alive && data) setSettings(data as InvoiceSettings);
+      if (alive && data) {
+        setSettings(data as InvoiceSettings);
+        // Pre-fill notes if current form notes are empty
+        setForm(prev => ({
+          ...prev,
+          notes: prev.notes || (data.notes_terms || "")
+        }));
+      }
     })();
     return () => { alive = false; };
     // eslint-disable-next-line react-hooks/exhaustive-deps

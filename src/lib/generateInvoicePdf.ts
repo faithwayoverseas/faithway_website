@@ -17,16 +17,29 @@ const COL_W = PAGE_W - (MARGIN * 2);
 
 // ── HELPERS ──────────────────────────────────────────────────────────────────
 
-/** Safely fetch image and convert to Base64 */
-async function safeImageLoader(url: string): Promise<string | null> {
+interface LoadedImage {
+  data: string;
+  width: number;
+  height: number;
+}
+
+/** Safely fetch image and get its dimensions */
+async function safeImageLoader(url: string): Promise<LoadedImage | null> {
   try {
     const res = await fetch(url);
     if (!res.ok) return null;
     const blob = await res.blob();
-    return await new Promise((resolve) => {
+    const dataUrl = await new Promise<string>((resolve) => {
       const reader = new FileReader();
       reader.onloadend = () => resolve(reader.result as string);
       reader.readAsDataURL(blob);
+    });
+
+    return await new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => resolve({ data: dataUrl, width: img.naturalWidth, height: img.naturalHeight });
+      img.onerror = () => resolve(null);
+      img.src = dataUrl;
     });
   } catch {
     return null;
@@ -75,9 +88,9 @@ export async function generateInvoicePdf(
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
 
   // Load Images
-  const logoBase64 = settings?.logo_url ? await safeImageLoader(settings.logo_url) : null;
-  const stampBase64 = settings?.stamp_url ? await safeImageLoader(settings.stamp_url) : null;
-  const signatureBase64 = settings?.signature_url ? await safeImageLoader(settings.signature_url) : null;
+  const logo = settings?.logo_url ? await safeImageLoader(settings.logo_url) : null;
+  const stamp = settings?.stamp_url ? await safeImageLoader(settings.stamp_url) : null;
+  const signature = settings?.signature_url ? await safeImageLoader(settings.signature_url) : null;
 
   const company = {
     name: settings?.company_name || 'FaithWay Overseas',
@@ -92,17 +105,40 @@ export async function generateInvoicePdf(
   // ── HEADER SECTION ───────────────────────────────────────────────────────
 
   // LEFT BLOCK: Logo & Subtext
-  if (logoBase64) {
-    doc.addImage(logoBase64, 'PNG', MARGIN, y, 35, 15);
+  // Logo Box: 55mm x 28mm
+  const logoBoxW = 55;
+  const logoBoxH = 28;
+  
+  if (logo) {
+    // object-fit: contain logic
+    const imgRatio = logo.width / logo.height;
+    const boxRatio = logoBoxW / logoBoxH;
+    
+    let renderW, renderH;
+    if (imgRatio > boxRatio) {
+      renderW = logoBoxW;
+      renderH = logoBoxW / imgRatio;
+    } else {
+      renderH = logoBoxH;
+      renderW = logoBoxH * imgRatio;
+    }
+    
+    // Center inside the 55x28 box
+    const offsetX = (logoBoxW - renderW) / 2;
+    const offsetY = (logoBoxH - renderH) / 2;
+    
+    doc.addImage(logo.data, 'PNG', MARGIN + offsetX, y + offsetY, renderW, renderH);
   } else {
+    // Fallback text logo
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(16);
     doc.setTextColor(...NAVY);
-    doc.text('FaithWay', MARGIN, y + 8);
+    doc.text('FaithWay', MARGIN, y + 10);
     doc.setTextColor(...GOLD);
-    doc.text('Overseas', MARGIN + 26, y + 8);
+    doc.text('Overseas', MARGIN + 26, y + 10);
   }
-  y += logoBase64 ? 18 : 12;
+
+  y += logoBoxH + 2;
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(8);
   doc.setTextColor(...NAVY);
@@ -113,12 +149,12 @@ export async function generateInvoicePdf(
   doc.setTextColor(...GREY);
   doc.text('Your Trusted Partner For Global Opportunities', MARGIN, y);
 
-  // CENTER BLOCK: Contact (drawn at fixed X)
+  // CENTER BLOCK: Contact
   const centerX = MARGIN + 60;
   const centerYStart = MARGIN;
   doc.setDrawColor(230, 230, 230);
   doc.setLineWidth(0.1);
-  doc.line(centerX - 5, centerYStart, centerX - 5, centerYStart + 25); // Left separator
+  doc.line(centerX - 5, centerYStart, centerX - 5, centerYStart + 35); // Left separator
 
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(7);
@@ -135,7 +171,7 @@ export async function generateInvoicePdf(
   // RIGHT BLOCK: Invoice Header
   const rightX = PAGE_W - MARGIN;
   const rightYStart = MARGIN;
-  doc.line(rightX - 75, centerYStart, rightX - 75, centerYStart + 25); // Right separator
+  doc.line(rightX - 75, centerYStart, rightX - 75, centerYStart + 35); // Right separator
 
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(24);
@@ -153,7 +189,7 @@ export async function generateInvoicePdf(
   doc.setTextColor(...DARK);
   doc.text(`DATE: ${new Date(invoice.invoice_date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).toUpperCase()}`, rightX - 3, rightYStart + 22, { align: 'right' });
 
-  y = MARGIN + 35; // Advance Y past header
+  y = MARGIN + 40; // Advance Y past header (increased slightly)
 
   // ── BILL TO + CURRENCY SECTION ──────────────────────────────────────────
 
@@ -350,11 +386,27 @@ export async function generateInvoicePdf(
   doc.text('FOR FAITHWAY OVERSEAS & IMMIGRATION', sigX + (sigW / 2), y + 5, { align: 'center' });
 
   // Stamp & Signature Images
-  if (stampBase64) {
-    doc.addImage(stampBase64, 'PNG', sigX + 5, y + 8, 22, 22);
+  if (stamp) {
+    // object-fit: contain for stamp
+    const sRatio = stamp.width / stamp.height;
+    const maxSW = 25;
+    const maxSH = 25;
+    let sw = maxSW, sh = maxSH;
+    if (sRatio > 1) sh = maxSW / sRatio; else sw = maxSH * sRatio;
+    doc.addImage(stamp.data, 'PNG', sigX + 5 + (maxSW - sw)/2, y + 8 + (maxSH - sh)/2, sw, sh);
   }
-  if (signatureBase64) {
-    doc.addImage(signatureBase64, 'PNG', sigX + 32, y + 10, 28, 18);
+  if (signature) {
+    // object-fit: contain for signature
+    const sigRatio = signature.width / signature.height;
+    const maxSigW = 30;
+    const maxSigH = 20;
+    let sigW_r = maxSigW, sigH_r = maxSigH;
+    if (sigRatio > (maxSigW / maxSigH)) {
+      sigH_r = maxSigW / sigRatio;
+    } else {
+      sigW_r = maxSigH * sigRatio;
+    }
+    doc.addImage(signature.data, 'PNG', sigX + 32 + (maxSigW - sigW_r)/2, y + 10 + (maxSigH - sigH_r)/2, sigW_r, sigH_r);
   }
 
   doc.setFont('helvetica', 'bold');

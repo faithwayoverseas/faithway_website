@@ -69,6 +69,7 @@ export interface InvoiceSettings {
   logo_url: string | null;
   signature_url: string | null;
   stamp_url: string | null;
+  notes_terms: string | null;
   last_invoice_year: number;
   last_invoice_serial: number;
   created_at: string;
