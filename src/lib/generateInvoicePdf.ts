@@ -77,6 +77,21 @@ class InvoiceLayout {
     return h;
   }
 
+  // Draw text that shrinks font size to fit width
+  drawAutoFitText(text: string, centerX: number, y: number, maxW: number, initialSize: number, options: any = {}) {
+    const { fontStyle = 'normal', color = DARK } = options;
+    this.doc.setFont('helvetica', fontStyle);
+    let size = initialSize;
+    this.doc.setFontSize(size);
+    while (this.doc.getTextWidth(text) > maxW && size > 5) {
+      size -= 0.2;
+      this.doc.setFontSize(size);
+    }
+    this.doc.setTextColor(...color);
+    this.doc.text(text, centerX, y, { align: 'center' });
+    return size;
+  }
+
   drawWrappedText(text: string | string[], x: number, y: number, maxWidth: number, options: any = {}) {
     const { fontSize = 9, fontStyle = 'normal', color = DARK, align = 'left', lineHeight = 1.2 } = options;
     this.doc.setFont('helvetica', fontStyle);
@@ -163,15 +178,17 @@ export async function generateInvoicePdf(
   const hH = 42;
 
   // Left: Branding
+  const brandTextW = LW - 8;
+  const brandCenterX = LX + LW/2;
+
   if (logo) L.fitImage(logo, LX, hY, LW - 4, 24);
   else {
     doc.setFont('helvetica', 'bold'); doc.setFontSize(22); doc.setTextColor(...NAVY);
-    doc.text('FAITHWAY', LX + (LW/2), hY + 12, { align: 'center' });
+    doc.text('FAITHWAY', brandCenterX, hY + 12, { align: 'center' });
   }
-  doc.setFont('helvetica', 'bold'); doc.setFontSize(10); doc.setTextColor(...NAVY);
-  doc.text('FAITHWAY OVERSEAS & IMMIGRATION', LX + LW/2, hY + 30, { align: 'center' });
-  doc.setFont('helvetica', 'normal'); doc.setFontSize(7.5); doc.setTextColor(...GREY);
-  doc.text('Your Trusted Partner For Global Opportunities', LX + LW/2, hY + 34, { align: 'center' });
+
+  L.drawAutoFitText('FAITHWAY OVERSEAS & IMMIGRATION', brandCenterX, hY + 30, brandTextW, 10, { fontStyle: 'bold', color: NAVY });
+  L.drawAutoFitText('Your Trusted Partner For Global Opportunities', brandCenterX, hY + 34, brandTextW, 7.5, { color: GREY });
 
   // Middle: Contact
   doc.setDrawColor(...BORDER_GRAY); doc.setLineWidth(0.2);
