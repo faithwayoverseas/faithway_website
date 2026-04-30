@@ -382,12 +382,13 @@ export async function generateInvoicePdf(
   doc.text('Global Website', fw*2.5, fY + 6.5, { align: 'center' });
   
   doc.setTextColor(...WHITE); doc.setFontSize(8);
-  doc.text(company.phone, fw/2, fY + 11.5, { align: 'center' });
+  doc.text('+971 50 888 1754', fw/2, fY + 11.5, { align: 'center' });
   doc.text('+91 72075 89444', fw*1.5, fY + 11.5, { align: 'center' });
-  doc.text(company.website, fw*2.5, fY + 11.5, { align: 'center' });
+  doc.text('https://faithway-website.vercel.app/', fw*2.5, fY + 11.5, { align: 'center' });
   
-  doc.setFontSize(7); doc.setTextColor(170, 180, 210);
-  doc.text('This is a System Generated Invoice.', PAGE_W/2, 292, { align: 'center' });
+  // System Generated Text (Bottom White Margin)
+  doc.setFont('helvetica', 'normal'); doc.setFontSize(8.5); doc.setTextColor(120, 120, 120);
+  doc.text('This is a System Generated Invoice.', PAGE_W/2, fY + 26, { align: 'center' });
 
   return doc.output('blob');
 }
